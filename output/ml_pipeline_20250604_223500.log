@@ -1,0 +1,55 @@
+2025-06-04 22:35:00,001 - INFO - === Enhanced ML Pipeline Starting ===
+2025-06-04 22:35:00,002 - INFO - ✅ BERT dependencies available
+2025-06-04 22:35:00,002 - INFO -    PyTorch version: 2.7.0
+2025-06-04 22:35:00,002 - INFO -    Transformers version: 4.52.4
+2025-06-04 22:35:00,002 - INFO -    Using CPU for BERT training
+2025-06-04 22:35:00,002 - INFO - 🚀 Starting Enhanced ML Pipeline with BERT Integration
+2025-06-04 22:35:00,002 - INFO - Loading dataset...
+2025-06-04 22:35:04,084 - INFO - Dataset loaded successfully: 157929 rows, 2 columns
+2025-06-04 22:35:04,097 - WARNING - Missing values found:
+title                        529
+combined_description_text      2
+dtype: int64
+2025-06-04 22:35:04,120 - INFO - After removing missing values: 157398 rows
+2025-06-04 22:35:04,120 - INFO - Total samples: 157398
+2025-06-04 22:35:04,124 - INFO - Unique job titles: 11
+2025-06-04 22:35:04,163 - INFO - Average description length: 2563.8 characters
+2025-06-04 22:35:04,163 - INFO - load_and_preprocess_data completed in 4.16 seconds
+2025-06-04 22:35:04,163 - INFO - Enhanced data preparation with ratios - Train: 0.7, Val: 0.15, Test: 0.15
+2025-06-04 22:35:04,167 - INFO - Original classes: 11
+2025-06-04 22:35:04,167 - INFO - Class distribution (top 10):
+title
+other                                       148331
+Software Development / Engineering            3398
+Product & Project Management (Technical)      2084
+IT & Systems Engineering                      1651
+Data Engineering                              1270
+UI/UX & Design (Tech-Oriented)                 234
+Data & AI                                      200
+DevOps / Site Reliability Engineering           88
+Cybersecurity / InfoSec                         76
+QA / Testing                                    45
+Name: count, dtype: int64
+2025-06-04 22:35:04,178 - INFO - Final number of classes: 11
+2025-06-04 22:35:04,244 - INFO - Data split sizes:
+2025-06-04 22:35:04,244 - INFO -   Training set: 110178 (70.0%)
+2025-06-04 22:35:04,244 - INFO -   Validation set: 23610 (15.0%)
+2025-06-04 22:35:04,244 - INFO -   Test set: 23610 (15.0%)
+2025-06-04 22:35:04,244 - INFO -   Train set classes: 11
+2025-06-04 22:35:04,244 - INFO -   Val set classes: 11
+2025-06-04 22:35:04,244 - INFO -   Test set classes: 11
+2025-06-04 22:35:04,246 - INFO - prepare_features_enhanced completed in 0.08 seconds
+2025-06-04 22:35:04,247 - INFO - Dataset splits - Train: 110178, Val: 23610, Test: 23610
+2025-06-04 22:35:04,247 - INFO - Creating enhanced TF-IDF vectors...
+2025-06-04 22:37:26,667 - INFO - TF-IDF matrix shapes:
+2025-06-04 22:37:26,668 - INFO -   Train: (110178, 2000)
+2025-06-04 22:37:26,668 - INFO -   Validation: (23610, 2000)
+2025-06-04 22:37:26,668 - INFO -   Test: (23610, 2000)
+2025-06-04 22:37:26,685 - INFO -   Total vocabulary size: 2000
+2025-06-04 22:37:26,685 - INFO - vectorize_text_enhanced completed in 142.44 seconds
+2025-06-04 22:37:26,685 - INFO - 📊 Performing cross-validation on traditional ML models...
+2025-06-04 22:37:26,685 - INFO - Performing 5-fold cross-validation...
+2025-06-04 22:37:26,685 - INFO - perform_cross_validation completed in 0.00 seconds
+2025-06-04 22:37:26,685 - INFO - 🔧 Performing hyperparameter tuning...
+2025-06-04 22:37:26,685 - INFO - Performing hyperparameter tuning...
+2025-06-04 22:37:26,685 - INFO - Tuning Logistic Regression...

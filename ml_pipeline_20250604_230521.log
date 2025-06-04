@@ -1,0 +1,41 @@
+2025-06-04 23:05:21,178 - INFO - === Enhanced ML Pipeline Starting ===
+2025-06-04 23:05:21,178 - INFO - 🚀 Starting Enhanced ML Pipeline
+2025-06-04 23:05:21,178 - INFO - Loading dataset...
+2025-06-04 23:05:24,803 - INFO - Dataset loaded successfully: 157929 rows, 2 columns
+2025-06-04 23:05:24,818 - WARNING - Missing values found:
+title                        529
+combined_description_text      2
+dtype: int64
+2025-06-04 23:05:24,843 - INFO - After removing missing values: 157398 rows
+2025-06-04 23:05:24,843 - INFO - Total samples: 157398
+2025-06-04 23:05:24,847 - INFO - Unique job titles: 11
+2025-06-04 23:05:24,884 - INFO - Average description length: 2563.8 characters
+2025-06-04 23:05:24,884 - INFO - load_and_preprocess_data completed in 3.71 seconds
+2025-06-04 23:05:24,884 - INFO - Enhanced data preparation with ratios - Train: 0.7, Val: 0.15, Test: 0.15
+2025-06-04 23:05:24,889 - INFO - Original classes: 11
+2025-06-04 23:05:24,889 - INFO - Class distribution (top 10):
+title
+other                                       148331
+Software Development / Engineering            3398
+Product & Project Management (Technical)      2084
+IT & Systems Engineering                      1651
+Data Engineering                              1270
+UI/UX & Design (Tech-Oriented)                 234
+Data & AI                                      200
+DevOps / Site Reliability Engineering           88
+Cybersecurity / InfoSec                         76
+QA / Testing                                    45
+Name: count, dtype: int64
+2025-06-04 23:05:24,899 - INFO - Final number of classes: 11
+2025-06-04 23:05:24,961 - INFO - Data split sizes:
+2025-06-04 23:05:24,961 - INFO -   Training set: 110178 (70.0%)
+2025-06-04 23:05:24,961 - INFO -   Validation set: 23610 (15.0%)
+2025-06-04 23:05:24,961 - INFO -   Test set: 23610 (15.0%)
+2025-06-04 23:05:24,961 - INFO -   Train set classes: 11
+2025-06-04 23:05:24,961 - INFO -   Val set classes: 11
+2025-06-04 23:05:24,961 - INFO -   Test set classes: 11
+2025-06-04 23:05:24,963 - INFO - prepare_features_enhanced completed in 0.08 seconds
+2025-06-04 23:05:26,395 - INFO - BERT model initialized with 11 classes on cpu
+2025-06-04 23:05:26,395 - INFO - BERT classifier created successfully with 11 classes
+2025-06-04 23:05:26,396 - INFO - Starting BERT training for 2 epochs...
+2025-06-04 23:05:26,399 - INFO - Epoch 1/2

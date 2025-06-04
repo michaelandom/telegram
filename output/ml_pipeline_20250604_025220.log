@@ -1,0 +1,267 @@
+2025-06-04 02:52:20,438 - INFO - === Enhanced ML Pipeline Starting ===
+2025-06-04 02:52:20,438 - INFO - 🚀 Starting Enhanced ML Pipeline
+2025-06-04 02:52:20,438 - INFO - Loading dataset...
+2025-06-04 02:52:24,318 - INFO - Dataset loaded successfully: 157929 rows, 2 columns
+2025-06-04 02:52:24,331 - WARNING - Missing values found:
+title                        529
+combined_description_text      2
+dtype: int64
+2025-06-04 02:52:24,355 - INFO - After removing missing values: 157398 rows
+2025-06-04 02:52:24,356 - INFO - Total samples: 157398
+2025-06-04 02:52:24,359 - INFO - Unique job titles: 11
+2025-06-04 02:52:24,395 - INFO - Average description length: 2563.8 characters
+2025-06-04 02:52:24,395 - INFO - load_and_preprocess_data completed in 3.96 seconds
+2025-06-04 02:52:24,395 - INFO - Enhanced data preparation with ratios - Train: 0.7, Val: 0.15, Test: 0.15
+2025-06-04 02:52:24,399 - INFO - Original classes: 11
+2025-06-04 02:52:24,400 - INFO - Class distribution (top 10):
+title
+other                                       148331
+Software Development / Engineering            3398
+Product & Project Management (Technical)      2084
+IT & Systems Engineering                      1651
+Data Engineering                              1270
+UI/UX & Design (Tech-Oriented)                 234
+Data & AI                                      200
+DevOps / Site Reliability Engineering           88
+Cybersecurity / InfoSec                         76
+QA / Testing                                    45
+Name: count, dtype: int64
+2025-06-04 02:52:24,409 - INFO - Final number of classes: 11
+2025-06-04 02:52:24,469 - INFO - Data split sizes:
+2025-06-04 02:52:24,469 - INFO -   Training set: 110178 (70.0%)
+2025-06-04 02:52:24,469 - INFO -   Validation set: 23610 (15.0%)
+2025-06-04 02:52:24,469 - INFO -   Test set: 23610 (15.0%)
+2025-06-04 02:52:24,470 - INFO -   Train set classes: 11
+2025-06-04 02:52:24,470 - INFO -   Val set classes: 11
+2025-06-04 02:52:24,470 - INFO -   Test set classes: 11
+2025-06-04 02:52:24,471 - INFO - prepare_features_enhanced completed in 0.08 seconds
+2025-06-04 02:52:24,471 - INFO - Creating enhanced TF-IDF vectors...
+2025-06-04 02:54:38,215 - INFO - TF-IDF matrix shapes:
+2025-06-04 02:54:38,216 - INFO -   Train: (110178, 2000)
+2025-06-04 02:54:38,216 - INFO -   Validation: (23610, 2000)
+2025-06-04 02:54:38,216 - INFO -   Test: (23610, 2000)
+2025-06-04 02:54:38,236 - INFO -   Total vocabulary size: 2000
+2025-06-04 02:54:38,236 - INFO - vectorize_text_enhanced completed in 133.77 seconds
+2025-06-04 02:54:38,237 - INFO - Performing 5-fold cross-validation...
+2025-06-04 02:54:38,237 - INFO - Cross-validating Logistic Regression...
+2025-06-04 02:55:18,070 - INFO - Logistic Regression CV Results:
+2025-06-04 02:55:18,071 - INFO -   Accuracy: 0.9516 (+/- 0.0011)
+2025-06-04 02:55:18,071 - INFO -   F1-Macro: 0.2405 (+/- 0.0104)
+2025-06-04 02:55:18,071 - INFO - Cross-validating Random Forest...
+2025-06-04 03:12:39,000 - INFO - Random Forest CV Results:
+2025-06-04 03:12:39,002 - INFO -   Accuracy: 0.9532 (+/- 0.0014)
+2025-06-04 03:12:39,002 - INFO -   F1-Macro: 0.2782 (+/- 0.0465)
+2025-06-04 03:12:39,002 - INFO - Cross-validating Naive Bayes...
+2025-06-04 03:12:41,496 - INFO - Naive Bayes CV Results:
+2025-06-04 03:12:41,496 - INFO -   Accuracy: 0.8669 (+/- 0.0039)
+2025-06-04 03:12:41,496 - INFO -   F1-Macro: 0.1439 (+/- 0.0128)
+2025-06-04 03:12:41,496 - INFO - Cross-validating XGBoost...
+2025-06-04 03:29:04,810 - INFO - XGBoost CV Results:
+2025-06-04 03:29:04,811 - INFO -   Accuracy: 0.9582 (+/- 0.0016)
+2025-06-04 03:29:04,811 - INFO -   F1-Macro: 0.3736 (+/- 0.0570)
+2025-06-04 03:29:04,811 - INFO - Cross-validating KNN...
+2025-06-04 03:41:43,316 - INFO - KNN CV Results:
+2025-06-04 03:41:43,323 - INFO -   Accuracy: 0.9483 (+/- 0.0025)
+2025-06-04 03:41:43,323 - INFO -   F1-Macro: 0.2151 (+/- 0.0516)
+2025-06-04 03:41:43,323 - INFO - perform_cross_validation completed in 2825.09 seconds
+2025-06-04 03:41:43,324 - INFO - Performing hyperparameter tuning...
+2025-06-04 03:41:43,325 - INFO - Tuning Logistic Regression...
+2025-06-04 06:02:41,292 - INFO - Best LR params: {'C': 10, 'max_iter': 1000, 'penalty': 'l1', 'solver': 'saga'}
+2025-06-04 06:02:41,294 - INFO - Best LR CV score: 0.4046
+2025-06-04 06:02:41,294 - INFO - Tuning Random Forest...
+2025-06-04 06:54:01,095 - INFO - Best RF params: {'n_estimators': 200, 'min_samples_split': 2, 'min_samples_leaf': 1, 'max_depth': None}
+2025-06-04 06:54:01,097 - INFO - Best RF CV score: 0.2719
+2025-06-04 06:54:01,097 - INFO - Tuning XGBoost...
+2025-06-04 09:13:59,504 - INFO - Best XGB params: {'subsample': 1.0, 'n_estimators': 100, 'max_depth': 9, 'learning_rate': 0.2}
+2025-06-04 09:13:59,512 - INFO - Best XGB CV score: 0.3598
+2025-06-04 09:13:59,517 - INFO - hyperparameter_tuning completed in 19936.19 seconds
+2025-06-04 09:13:59,518 - INFO - Training and evaluating models with comprehensive metrics...
+2025-06-04 09:13:59,526 - INFO - Training and evaluating Logistic Regression...
+2025-06-04 09:14:26,686 - INFO - Logistic Regression Results:
+2025-06-04 09:14:26,689 - INFO -   Validation - Accuracy: 0.9526, F1-Macro: 0.2649
+2025-06-04 09:14:26,689 - INFO -   Test - Accuracy: 0.9515, F1-Macro: 0.2439
+2025-06-04 09:14:26,689 - INFO -   Training time: 27.16s
+2025-06-04 09:14:26,689 - INFO - Training and evaluating Random Forest...
+2025-06-04 09:23:06,759 - INFO - Random Forest Results:
+2025-06-04 09:23:06,759 - INFO -   Validation - Accuracy: 0.9538, F1-Macro: 0.3214
+2025-06-04 09:23:06,760 - INFO -   Test - Accuracy: 0.9543, F1-Macro: 0.3023
+2025-06-04 09:23:06,760 - INFO -   Training time: 520.07s
+2025-06-04 09:23:06,760 - INFO - Training and evaluating Naive Bayes...
+2025-06-04 09:23:07,011 - INFO - Naive Bayes Results:
+2025-06-04 09:23:07,011 - INFO -   Validation - Accuracy: 0.8687, F1-Macro: 0.1522
+2025-06-04 09:23:07,011 - INFO -   Test - Accuracy: 0.8657, F1-Macro: 0.1571
+2025-06-04 09:23:07,011 - INFO -   Training time: 0.25s
+2025-06-04 09:23:07,012 - INFO - Training and evaluating XGBoost...
+2025-06-04 09:25:34,895 - INFO - XGBoost Results:
+2025-06-04 09:25:34,898 - INFO -   Validation - Accuracy: 0.9593, F1-Macro: 0.3777
+2025-06-04 09:25:34,898 - INFO -   Test - Accuracy: 0.9580, F1-Macro: 0.3724
+2025-06-04 09:25:34,898 - INFO -   Training time: 147.88s
+2025-06-04 09:25:34,898 - INFO - Training and evaluating KNN...
+2025-06-04 09:34:13,478 - INFO - KNN Results:
+2025-06-04 09:34:13,480 - INFO -   Validation - Accuracy: 0.9479, F1-Macro: 0.1995
+2025-06-04 09:34:13,480 - INFO -   Test - Accuracy: 0.9472, F1-Macro: 0.1850
+2025-06-04 09:34:13,480 - INFO -   Training time: 518.58s
+2025-06-04 09:34:13,480 - INFO - Training and evaluating Logistic Regression_Tuned...
+2025-06-04 10:31:52,641 - INFO - Logistic Regression_Tuned Results:
+2025-06-04 10:31:52,643 - INFO -   Validation - Accuracy: 0.9532, F1-Macro: 0.4449
+2025-06-04 10:31:52,643 - INFO -   Test - Accuracy: 0.9510, F1-Macro: 0.4043
+2025-06-04 10:31:52,643 - INFO -   Training time: 3459.16s
+2025-06-04 10:31:52,643 - INFO - Training and evaluating Random Forest_Tuned...
+2025-06-04 10:44:57,430 - INFO - Random Forest_Tuned Results:
+2025-06-04 10:44:57,432 - INFO -   Validation - Accuracy: 0.9535, F1-Macro: 0.3227
+2025-06-04 10:44:57,432 - INFO -   Test - Accuracy: 0.9542, F1-Macro: 0.2817
+2025-06-04 10:44:57,432 - INFO -   Training time: 784.79s
+2025-06-04 10:44:57,432 - INFO - Training and evaluating XGBoost_Tuned...
+2025-06-04 10:48:27,516 - INFO - XGBoost_Tuned Results:
+2025-06-04 10:48:27,518 - INFO -   Validation - Accuracy: 0.9599, F1-Macro: 0.3860
+2025-06-04 10:48:27,518 - INFO -   Test - Accuracy: 0.9600, F1-Macro: 0.3943
+2025-06-04 10:48:27,519 - INFO -   Training time: 210.08s
+2025-06-04 10:48:27,519 - INFO - train_and_evaluate_models completed in 5668.00 seconds
+2025-06-04 10:48:27,519 - INFO - Training enhanced deep learning model...
+2025-06-04 10:48:28,345 - INFO - Training neural network with validation...
+2025-06-04 10:51:36,610 - INFO - Deep Learning Results:
+2025-06-04 10:51:36,611 - INFO -   Test Accuracy: 0.9594
+2025-06-04 10:51:36,612 - INFO -   Test F1-Macro: 0.4357
+2025-06-04 10:51:36,612 - INFO -   Training stopped at epoch: 17
+2025-06-04 10:51:36,650 - INFO - train_deep_learning_model_enhanced completed in 189.13 seconds
+2025-06-04 10:51:36,679 - INFO - Performing enhanced clustering analysis...
+2025-06-04 10:51:36,680 - INFO - Running KMeans with 11 clusters...
+2025-06-04 11:23:23,494 - INFO - KMeans - ARI: -0.0068, Silhouette: 0.0324
+2025-06-04 11:23:23,496 - INFO - Running DBSCAN clustering...
+2025-06-04 14:10:07,054 - INFO - DBSCAN (eps=0.3) - Clusters: 1732, Noise: 139991
+2025-06-04 14:10:07,058 - INFO - DBSCAN - ARI: 0.0001, Silhouette: 0.5923
+2025-06-04 14:10:07,071 - INFO - perform_clustering_enhanced completed in 11910.39 seconds
+2025-06-04 14:10:07,072 - INFO - 
+🏆 Best Model: XGBoost_Tuned
+2025-06-04 14:10:07,072 - INFO -    Test Accuracy: 0.9600
+2025-06-04 14:10:07,072 - INFO -    Test F1-Macro: 0.3943
+2025-06-04 14:10:07,073 - INFO - Creating comprehensive visualizations...
+2025-06-04 14:11:52,558 - INFO - Comprehensive visualization saved as comprehensive_results_20250604_141007.png
+2025-06-04 14:12:58,395 - INFO - Confusion matrix saved as confusion_matrix_XGBoost_Tuned_20250604_141152.png
+2025-06-04 14:12:58,395 - INFO - Generating detailed performance report...
+2025-06-04 14:12:58,397 - INFO - ================================================================================
+2025-06-04 14:12:58,397 - INFO - COMPREHENSIVE ML PIPELINE PERFORMANCE REPORT
+2025-06-04 14:12:58,397 - INFO - ================================================================================
+2025-06-04 14:12:58,397 - INFO - Generated on: 2025-06-04 14:12:58
+2025-06-04 14:12:58,397 - INFO - Total number of classes: 11
+2025-06-04 14:12:58,397 - INFO - 
+2025-06-04 14:12:58,397 - INFO - CROSS-VALIDATION RESULTS
+2025-06-04 14:12:58,397 - INFO - ----------------------------------------
+2025-06-04 14:12:58,397 - INFO - Logistic Regression:
+2025-06-04 14:12:58,397 - INFO -   Accuracy: 0.9516 (+/- 0.0011)
+2025-06-04 14:12:58,397 - INFO -   F1-Macro: 0.2405 (+/- 0.0104)
+2025-06-04 14:12:58,397 - INFO - 
+2025-06-04 14:12:58,397 - INFO - Random Forest:
+2025-06-04 14:12:58,397 - INFO -   Accuracy: 0.9532 (+/- 0.0014)
+2025-06-04 14:12:58,397 - INFO -   F1-Macro: 0.2782 (+/- 0.0465)
+2025-06-04 14:12:58,397 - INFO - 
+2025-06-04 14:12:58,397 - INFO - Naive Bayes:
+2025-06-04 14:12:58,397 - INFO -   Accuracy: 0.8669 (+/- 0.0039)
+2025-06-04 14:12:58,397 - INFO -   F1-Macro: 0.1439 (+/- 0.0128)
+2025-06-04 14:12:58,397 - INFO - 
+2025-06-04 14:12:58,397 - INFO - XGBoost:
+2025-06-04 14:12:58,397 - INFO -   Accuracy: 0.9582 (+/- 0.0016)
+2025-06-04 14:12:58,397 - INFO -   F1-Macro: 0.3736 (+/- 0.0570)
+2025-06-04 14:12:58,397 - INFO - 
+2025-06-04 14:12:58,397 - INFO - KNN:
+2025-06-04 14:12:58,397 - INFO -   Accuracy: 0.9483 (+/- 0.0025)
+2025-06-04 14:12:58,397 - INFO -   F1-Macro: 0.2151 (+/- 0.0516)
+2025-06-04 14:12:58,397 - INFO - 
+2025-06-04 14:12:58,397 - INFO - TEST SET PERFORMANCE
+2025-06-04 14:12:58,398 - INFO - ----------------------------------------
+2025-06-04 14:12:58,398 - INFO - XGBoost_Tuned:
+2025-06-04 14:12:58,398 - INFO -   Accuracy: 0.9600
+2025-06-04 14:12:58,398 - INFO -   Precision (macro): 0.6084
+2025-06-04 14:12:58,398 - INFO -   Recall (macro): 0.3084
+2025-06-04 14:12:58,398 - INFO -   F1-Score (macro): 0.3943
+2025-06-04 14:12:58,398 - INFO -   F1-Score (weighted): 0.9524
+2025-06-04 14:12:58,398 - INFO -   Training Time: 210.08s
+2025-06-04 14:12:58,398 - INFO - 
+2025-06-04 14:12:58,398 - INFO - Deep Learning:
+2025-06-04 14:12:58,398 - INFO -   Accuracy: 0.9594
+2025-06-04 14:12:58,398 - INFO -   Precision (macro): 0.6943
+2025-06-04 14:12:58,398 - INFO -   Recall (macro): 0.3499
+2025-06-04 14:12:58,398 - INFO -   F1-Score (macro): 0.4357
+2025-06-04 14:12:58,398 - INFO -   F1-Score (weighted): 0.9540
+2025-06-04 14:12:58,398 - INFO -   Training Time: 0.00s
+2025-06-04 14:12:58,398 - INFO - 
+2025-06-04 14:12:58,398 - INFO - XGBoost:
+2025-06-04 14:12:58,398 - INFO -   Accuracy: 0.9580
+2025-06-04 14:12:58,398 - INFO -   Precision (macro): 0.5794
+2025-06-04 14:12:58,398 - INFO -   Recall (macro): 0.2926
+2025-06-04 14:12:58,398 - INFO -   F1-Score (macro): 0.3724
+2025-06-04 14:12:58,398 - INFO -   F1-Score (weighted): 0.9501
+2025-06-04 14:12:58,398 - INFO -   Training Time: 147.88s
+2025-06-04 14:12:58,398 - INFO - 
+2025-06-04 14:12:58,398 - INFO - Random Forest:
+2025-06-04 14:12:58,398 - INFO -   Accuracy: 0.9543
+2025-06-04 14:12:58,398 - INFO -   Precision (macro): 0.6697
+2025-06-04 14:12:58,398 - INFO -   Recall (macro): 0.2250
+2025-06-04 14:12:58,398 - INFO -   F1-Score (macro): 0.3023
+2025-06-04 14:12:58,398 - INFO -   F1-Score (weighted): 0.9416
+2025-06-04 14:12:58,398 - INFO -   Training Time: 520.07s
+2025-06-04 14:12:58,398 - INFO - 
+2025-06-04 14:12:58,398 - INFO - Random Forest_Tuned:
+2025-06-04 14:12:58,398 - INFO -   Accuracy: 0.9542
+2025-06-04 14:12:58,398 - INFO -   Precision (macro): 0.6514
+2025-06-04 14:12:58,398 - INFO -   Recall (macro): 0.2103
+2025-06-04 14:12:58,398 - INFO -   F1-Score (macro): 0.2817
+2025-06-04 14:12:58,398 - INFO -   F1-Score (weighted): 0.9412
+2025-06-04 14:12:58,398 - INFO -   Training Time: 784.79s
+2025-06-04 14:12:58,398 - INFO - 
+2025-06-04 14:12:58,398 - INFO - Logistic Regression:
+2025-06-04 14:12:58,398 - INFO -   Accuracy: 0.9515
+2025-06-04 14:12:58,398 - INFO -   Precision (macro): 0.4268
+2025-06-04 14:12:58,398 - INFO -   Recall (macro): 0.1940
+2025-06-04 14:12:58,398 - INFO -   F1-Score (macro): 0.2439
+2025-06-04 14:12:58,398 - INFO -   F1-Score (weighted): 0.9392
+2025-06-04 14:12:58,398 - INFO -   Training Time: 27.16s
+2025-06-04 14:12:58,398 - INFO - 
+2025-06-04 14:12:58,398 - INFO - Logistic Regression_Tuned:
+2025-06-04 14:12:58,398 - INFO -   Accuracy: 0.9510
+2025-06-04 14:12:58,398 - INFO -   Precision (macro): 0.5642
+2025-06-04 14:12:58,398 - INFO -   Recall (macro): 0.3416
+2025-06-04 14:12:58,398 - INFO -   F1-Score (macro): 0.4043
+2025-06-04 14:12:58,398 - INFO -   F1-Score (weighted): 0.9446
+2025-06-04 14:12:58,398 - INFO -   Training Time: 3459.16s
+2025-06-04 14:12:58,398 - INFO - 
+2025-06-04 14:12:58,398 - INFO - KNN:
+2025-06-04 14:12:58,398 - INFO -   Accuracy: 0.9472
+2025-06-04 14:12:58,398 - INFO -   Precision (macro): 0.3949
+2025-06-04 14:12:58,398 - INFO -   Recall (macro): 0.1510
+2025-06-04 14:12:58,398 - INFO -   F1-Score (macro): 0.1850
+2025-06-04 14:12:58,398 - INFO -   F1-Score (weighted): 0.9309
+2025-06-04 14:12:58,398 - INFO -   Training Time: 518.58s
+2025-06-04 14:12:58,398 - INFO - 
+2025-06-04 14:12:58,398 - INFO - Naive Bayes:
+2025-06-04 14:12:58,398 - INFO -   Accuracy: 0.8657
+2025-06-04 14:12:58,398 - INFO -   Precision (macro): 0.2357
+2025-06-04 14:12:58,398 - INFO -   Recall (macro): 0.1795
+2025-06-04 14:12:58,398 - INFO -   F1-Score (macro): 0.1571
+2025-06-04 14:12:58,398 - INFO -   F1-Score (weighted): 0.8846
+2025-06-04 14:12:58,398 - INFO -   Training Time: 0.25s
+2025-06-04 14:12:58,398 - INFO - 
+2025-06-04 14:12:58,398 - INFO - CLUSTERING ANALYSIS
+2025-06-04 14:12:58,398 - INFO - ----------------------------------------
+2025-06-04 14:12:58,398 - INFO - KMeans_ARI: -0.0068
+2025-06-04 14:12:58,399 - INFO - KMeans_Silhouette: 0.0324
+2025-06-04 14:12:58,399 - INFO - DBSCAN_ARI: 0.0001
+2025-06-04 14:12:58,399 - INFO - DBSCAN_Silhouette: 0.5923
+2025-06-04 14:12:58,399 - INFO - 
+2025-06-04 14:12:58,399 - INFO - RECOMMENDATIONS
+2025-06-04 14:12:58,399 - INFO - ----------------------------------------
+2025-06-04 14:12:58,399 - INFO - Best performing model: XGBoost_Tuned
+2025-06-04 14:12:58,399 - INFO - Best test accuracy: 0.9600
+2025-06-04 14:12:58,399 - INFO - ✅ Excellent performance achieved!
+2025-06-04 14:12:58,399 - INFO - 
+2025-06-04 14:12:58,399 - INFO - ================================================================================
+2025-06-04 14:12:58,399 - INFO - Detailed report saved as ml_pipeline_report_20250604_141258.txt
+2025-06-04 14:12:58,399 - INFO - Making enhanced prediction for new job description...
+2025-06-04 14:12:58,442 - INFO - Top predictions:
+2025-06-04 14:12:58,442 - INFO -   1. other (confidence: 0.9927269220352173)
+2025-06-04 14:12:58,442 - INFO -   2. Software Development / Engineering (confidence: 0.0035360646434128284)
+2025-06-04 14:12:58,442 - INFO -   3. IT & Systems Engineering (confidence: 0.0032250366639345884)
+2025-06-04 14:12:58,442 - INFO - 
+⏱️  Total Enhanced Pipeline Execution Time: 40838.00 seconds
+2025-06-04 14:12:58,442 - INFO - 🎉 Enhanced ML Pipeline Completed Successfully!
+2025-06-04 14:12:58,442 - INFO - 📊 Check generated files for detailed results and visualizations

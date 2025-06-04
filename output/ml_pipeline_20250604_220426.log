@@ -1,0 +1,99 @@
+2025-06-04 22:04:26,546 - INFO - === Enhanced ML Pipeline Starting ===
+2025-06-04 22:04:26,546 - INFO - 🚀 Starting Enhanced ML Pipeline
+2025-06-04 22:04:26,546 - INFO - Loading dataset...
+2025-06-04 22:04:30,204 - INFO - Dataset loaded successfully: 157929 rows, 2 columns
+2025-06-04 22:04:30,221 - WARNING - Missing values found:
+title                        529
+combined_description_text      2
+dtype: int64
+2025-06-04 22:04:30,245 - INFO - After removing missing values: 157398 rows
+2025-06-04 22:04:30,245 - INFO - Total samples: 157398
+2025-06-04 22:04:30,249 - INFO - Unique job titles: 11
+2025-06-04 22:04:30,283 - INFO - Average description length: 2563.8 characters
+2025-06-04 22:04:30,283 - INFO - load_and_preprocess_data completed in 3.74 seconds
+2025-06-04 22:04:30,283 - INFO - Enhanced data preparation with ratios - Train: 0.7, Val: 0.15, Test: 0.15
+2025-06-04 22:04:30,288 - INFO - Original classes: 11
+2025-06-04 22:04:30,288 - INFO - Class distribution (top 10):
+title
+other                                       148331
+Software Development / Engineering            3398
+Product & Project Management (Technical)      2084
+IT & Systems Engineering                      1651
+Data Engineering                              1270
+UI/UX & Design (Tech-Oriented)                 234
+Data & AI                                      200
+DevOps / Site Reliability Engineering           88
+Cybersecurity / InfoSec                         76
+QA / Testing                                    45
+Name: count, dtype: int64
+2025-06-04 22:04:30,299 - INFO - Final number of classes: 11
+2025-06-04 22:04:30,362 - INFO - Data split sizes:
+2025-06-04 22:04:30,362 - INFO -   Training set: 110178 (70.0%)
+2025-06-04 22:04:30,362 - INFO -   Validation set: 23610 (15.0%)
+2025-06-04 22:04:30,362 - INFO -   Test set: 23610 (15.0%)
+2025-06-04 22:04:30,362 - INFO -   Train set classes: 11
+2025-06-04 22:04:30,362 - INFO -   Val set classes: 11
+2025-06-04 22:04:30,362 - INFO -   Test set classes: 11
+2025-06-04 22:04:30,364 - INFO - prepare_features_enhanced completed in 0.08 seconds
+2025-06-04 22:04:30,364 - INFO - Creating enhanced TF-IDF vectors...
+2025-06-04 22:06:54,175 - INFO - TF-IDF matrix shapes:
+2025-06-04 22:06:54,176 - INFO -   Train: (110178, 2000)
+2025-06-04 22:06:54,176 - INFO -   Validation: (23610, 2000)
+2025-06-04 22:06:54,176 - INFO -   Test: (23610, 2000)
+2025-06-04 22:06:54,198 - INFO -   Total vocabulary size: 2000
+2025-06-04 22:06:54,198 - INFO - vectorize_text_enhanced completed in 143.83 seconds
+2025-06-04 22:07:57,870 - INFO - Performing 5-fold cross-validation...
+2025-06-04 22:07:57,871 - INFO - Cross-validating TF-IDF + Logistic Regression...
+2025-06-04 22:07:59,556 - ERROR - Error in cross-validation for TF-IDF + Logistic Regression: 
+All the 5 fits failed.
+It is very likely that your model is misconfigured.
+You can try to debug the error by setting error_score='raise'.
+
+Below are more details about the failures:
+--------------------------------------------------------------------------------
+5 fits failed with the following error:
+Traceback (most recent call last):
+  File "/Users/michaelandom/Desktop/telegram/.venv/lib/python3.13/site-packages/sklearn/model_selection/_validation.py", line 866, in _fit_and_score
+    estimator.fit(X_train, y_train, **fit_params)
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/michaelandom/Desktop/telegram/.venv/lib/python3.13/site-packages/sklearn/base.py", line 1389, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "/Users/michaelandom/Desktop/telegram/.venv/lib/python3.13/site-packages/sklearn/pipeline.py", line 654, in fit
+    Xt = self._fit(X, y, routed_params, raw_params=params)
+  File "/Users/michaelandom/Desktop/telegram/.venv/lib/python3.13/site-packages/sklearn/pipeline.py", line 588, in _fit
+    X, fitted_transformer = fit_transform_one_cached(
+                            ~~~~~~~~~~~~~~~~~~~~~~~~^
+        cloned_transformer,
+        ^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+        params=step_params,
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/michaelandom/Desktop/telegram/.venv/lib/python3.13/site-packages/joblib/memory.py", line 326, in __call__
+    return self.func(*args, **kwargs)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/michaelandom/Desktop/telegram/.venv/lib/python3.13/site-packages/sklearn/pipeline.py", line 1551, in _fit_transform_one
+    res = transformer.fit_transform(X, y, **params.get("fit_transform", {}))
+  File "/Users/michaelandom/Desktop/telegram/.venv/lib/python3.13/site-packages/sklearn/feature_extraction/text.py", line 2104, in fit_transform
+    X = super().fit_transform(raw_documents)
+  File "/Users/michaelandom/Desktop/telegram/.venv/lib/python3.13/site-packages/sklearn/base.py", line 1389, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+  File "/Users/michaelandom/Desktop/telegram/.venv/lib/python3.13/site-packages/sklearn/feature_extraction/text.py", line 1376, in fit_transform
+    vocabulary, X = self._count_vocab(raw_documents, self.fixed_vocabulary_)
+                    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/michaelandom/Desktop/telegram/.venv/lib/python3.13/site-packages/sklearn/feature_extraction/text.py", line 1263, in _count_vocab
+    for feature in analyze(doc):
+                   ~~~~~~~^^^^^
+  File "/Users/michaelandom/Desktop/telegram/.venv/lib/python3.13/site-packages/sklearn/feature_extraction/text.py", line 104, in _analyze
+    doc = preprocessor(doc)
+  File "/Users/michaelandom/Desktop/telegram/.venv/lib/python3.13/site-packages/sklearn/feature_extraction/text.py", line 62, in _preprocess
+    doc = doc.lower()
+          ^^^^^^^^^
+AttributeError: 'csr_matrix' object has no attribute 'lower'. Did you mean: 'power'?
+
+2025-06-04 22:07:59,556 - INFO - Cross-validating BERT...
+2025-06-04 22:07:59,725 - ERROR - Error in cross-validation for BERT: 'BertClassifier' object has no attribute 'model_name'
+2025-06-04 22:07:59,725 - INFO - perform_cross_validation completed in 1.85 seconds
+2025-06-04 22:07:59,725 - INFO - Performing hyperparameter tuning...
+2025-06-04 22:07:59,725 - INFO - Tuning Logistic Regression...

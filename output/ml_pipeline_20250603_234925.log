@@ -1,0 +1,58 @@
+2025-06-03 23:49:25,763 - INFO - === Enhanced ML Pipeline Starting ===
+2025-06-03 23:49:25,763 - INFO - 🚀 Starting Enhanced ML Pipeline
+2025-06-03 23:49:25,763 - INFO - Loading dataset...
+2025-06-03 23:49:29,257 - INFO - Dataset loaded successfully: 157929 rows, 2 columns
+2025-06-03 23:49:29,272 - WARNING - Missing values found:
+title                        529
+combined_description_text      2
+dtype: int64
+2025-06-03 23:49:29,293 - INFO - After removing missing values: 157398 rows
+2025-06-03 23:49:29,293 - INFO - Total samples: 157398
+2025-06-03 23:49:29,297 - INFO - Unique job titles: 11
+2025-06-03 23:49:29,327 - INFO - Average description length: 2563.8 characters
+2025-06-03 23:49:29,327 - INFO - load_and_preprocess_data completed in 3.56 seconds
+2025-06-03 23:49:29,327 - INFO - Enhanced data preparation with ratios - Train: 0.7, Val: 0.15, Test: 0.15
+2025-06-03 23:49:29,332 - INFO - Original classes: 11
+2025-06-03 23:49:29,332 - INFO - Class distribution (top 10):
+title
+other                                       148331
+Software Development / Engineering            3398
+Product & Project Management (Technical)      2084
+IT & Systems Engineering                      1651
+Data Engineering                              1270
+UI/UX & Design (Tech-Oriented)                 234
+Data & AI                                      200
+DevOps / Site Reliability Engineering           88
+Cybersecurity / InfoSec                         76
+QA / Testing                                    45
+Name: count, dtype: int64
+2025-06-03 23:49:29,342 - INFO - Final number of classes: 11
+2025-06-03 23:49:29,400 - INFO - Data split sizes:
+2025-06-03 23:49:29,400 - INFO -   Training set: 110178 (70.0%)
+2025-06-03 23:49:29,400 - INFO -   Validation set: 23610 (15.0%)
+2025-06-03 23:49:29,400 - INFO -   Test set: 23610 (15.0%)
+2025-06-03 23:49:29,401 - INFO -   Train set classes: 11
+2025-06-03 23:49:29,401 - INFO -   Val set classes: 11
+2025-06-03 23:49:29,401 - INFO -   Test set classes: 11
+2025-06-03 23:49:29,402 - INFO - prepare_features_enhanced completed in 0.07 seconds
+2025-06-03 23:49:29,402 - INFO - Creating enhanced TF-IDF vectors...
+2025-06-03 23:51:50,429 - INFO - TF-IDF matrix shapes:
+2025-06-03 23:51:50,430 - INFO -   Train: (110178, 2000)
+2025-06-03 23:51:50,430 - INFO -   Validation: (23610, 2000)
+2025-06-03 23:51:50,430 - INFO -   Test: (23610, 2000)
+2025-06-03 23:51:50,458 - INFO -   Total vocabulary size: 2000
+2025-06-03 23:51:50,458 - INFO - vectorize_text_enhanced completed in 141.06 seconds
+2025-06-03 23:51:50,462 - INFO - Performing 5-fold cross-validation...
+2025-06-03 23:51:50,462 - INFO - Cross-validating Logistic Regression...
+2025-06-03 23:52:15,385 - INFO - Logistic Regression CV Results:
+2025-06-03 23:52:15,386 - INFO -   Accuracy: 0.9516 (+/- 0.0011)
+2025-06-03 23:52:15,386 - INFO -   F1-Macro: 0.2405 (+/- 0.0104)
+2025-06-03 23:52:15,387 - INFO - Cross-validating Random Forest...
+2025-06-04 00:04:17,248 - INFO - Random Forest CV Results:
+2025-06-04 00:04:17,249 - INFO -   Accuracy: 0.9532 (+/- 0.0014)
+2025-06-04 00:04:17,249 - INFO -   F1-Macro: 0.2782 (+/- 0.0465)
+2025-06-04 00:04:17,249 - INFO - Cross-validating Naive Bayes...
+2025-06-04 00:04:19,545 - INFO - Naive Bayes CV Results:
+2025-06-04 00:04:19,545 - INFO -   Accuracy: 0.8669 (+/- 0.0039)
+2025-06-04 00:04:19,545 - INFO -   F1-Macro: 0.1439 (+/- 0.0128)
+2025-06-04 00:04:19,545 - INFO - Cross-validating SVM...
