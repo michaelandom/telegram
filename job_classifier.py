@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 import time
 import logging
+import os
+import sys
+import multiprocessing as mp
 from datetime import datetime
 from sklearn.model_selection import (
     train_test_split, cross_val_score, StratifiedKFold,
@@ -34,7 +37,7 @@ import seaborn as sns
 import warnings
 import torch
 from custom_bert import train_bert_model
-
+from bert_trainer import BertTrainer
 warnings.filterwarnings('ignore')
 
 
@@ -119,7 +122,7 @@ def load_and_preprocess_data():
     """Load and preprocess the dataset"""
     logger.info("Loading dataset...")
     try:
-        data = pd.read_csv("huhu_output.csv")
+        data = pd.read_csv("telegram_output.csv")
         logger.info(
             f"Dataset loaded successfully: {data.shape[0]} rows, {data.shape[1]} columns")
 
@@ -403,17 +406,17 @@ def train_and_evaluate_models(X_train_tfidf, X_val_tfidf, X_test_tfidf,
 
     # Base models
     base_models = {
-        # "Logistic Regression": LogisticRegression(max_iter=1000, random_state=42),
-        # "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
-        # "Naive Bayes": MultinomialNB(),
-        # # "SVM": SVC(probability=True, random_state=42),
-        # "XGBoost": XGBClassifier(
-        #     use_label_encoder=False,
-        #     eval_metric='mlogloss',
-        #     random_state=42,
-        #     verbosity=0
-        # ),
-        # "KNN": KNeighborsClassifier(n_neighbors=7)
+        "Logistic Regression": LogisticRegression(max_iter=1000, random_state=42),
+        "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
+        "Naive Bayes": MultinomialNB(),
+        # "SVM": SVC(probability=True, random_state=42),
+        "XGBoost": XGBClassifier(
+            use_label_encoder=False,
+            eval_metric='mlogloss',
+            random_state=42,
+            verbosity=0
+        ),
+        "KNN": KNeighborsClassifier(n_neighbors=7)
     }
 
     # Use tuned models if available
@@ -988,7 +991,19 @@ def predict_new_job_enhanced(best_model_name, trained_models, dl_model, dl_metri
         logger.error(f"Error in enhanced prediction: {str(e)}")
         return "Error in prediction", 0.0, []
 
-# === Main Execution ===
+def setup_environment():
+    """Set up the environment to avoid segmentation faults."""
+    try:
+        mp.set_start_method('spawn', force=True)
+        logger.info("Set multiprocessing start method to 'spawn'")
+    except RuntimeError:
+        logger.info("Multiprocessing start method already set")
+    
+    os.environ['TOKENIZERS_PARALLELISM'] = 'false'  
+    os.environ['OMP_NUM_THREADS'] = '1' 
+    
+    if sys.platform == 'darwin':
+        os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
 
 
 def main():
@@ -996,7 +1011,11 @@ def main():
     total_start_time = time.time()
 
     try:
+        setup_environment()
         logger.info("🚀 Starting Enhanced ML Pipeline")
+        bertTrainer = BertTrainer(csv_path="telegram_output.csv")
+        bertTrainer.train_model()
+        logger.info("BertTrainer Train data")
 
         # Load and preprocess data
         X, y = load_and_preprocess_data()
@@ -1006,27 +1025,26 @@ def main():
             X, y, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15
         )
 
-        bert_result = train_bert_model(
-            X_train, y_train,
-            X_val, y_val,
-            num_classes=11,
-            epochs=2,
-            batch_size=2
-        )
-        # Enhanced vectorization
+        # bert_result = train_bert_model(
+        #     X_train, y_train,
+        #     X_val, y_val,
+        #     num_classes=11,
+        #     epochs=2,
+        #     batch_size=2
+        # )
         X_train_tfidf, X_val_tfidf, X_test_tfidf, X_all_tfidf, tfidf = vectorize_text_enhanced(
             X_train, X_val, X_test, X_filtered
         )
 
         # Define base models for cross-validation
         base_models = {
-            # "Logistic Regression": LogisticRegression(max_iter=1000, random_state=42),
-            # "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
-            # "Naive Bayes": MultinomialNB(),
-            # # "SVM": SVC(probability=True, random_state=42),
-            # "XGBoost": XGBClassifier(use_label_encoder=False, eval_metric='mlogloss',
-            #                        random_state=42, verbosity=0),
-            # "KNN": KNeighborsClassifier(n_neighbors=7)
+            "Logistic Regression": LogisticRegression(max_iter=1000, random_state=42),
+            "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
+            "Naive Bayes": MultinomialNB(),
+            # "SVM": SVC(probability=True, random_state=42),
+            "XGBoost": XGBClassifier(use_label_encoder=False, eval_metric='mlogloss',
+                                   random_state=42, verbosity=0),
+            "KNN": KNeighborsClassifier(n_neighbors=7)
         }
 
         # Perform cross-validation

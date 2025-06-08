@@ -1,4 +1,3 @@
-
 import asyncio
 from telethon import TelegramClient
 from telethon.errors import SessionPasswordNeededError
@@ -9,8 +8,12 @@ import os
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError, ConnectionFailure
 from urllib.parse import urlparse, parse_qs
-
-
+from afriwork_scraper_mini_app import AfriworketMiniAppScraper
+from hahu_web_site_scraper import HahuWebSiteScraper
+from extract_and_add_category import ExtractAndAddCategory
+from extract_title_and_label_categories_jobs import ExtractTitleAndLabelCategoryAfriwork
+from afriwork_to_csv import AfriworkToCsv
+from hahu_web_to_csv import HahuToCsv
 class Config:
     def __init__(self):
         self.API_ID = '29511239'
@@ -18,10 +21,19 @@ class Config:
         self.PHONE_NUMBER = '+49151759448'
         self.MONGO_URI = "mongodb://localhost:27017/"
         self.DB_NAME = "telegram"
-        self.LIMIT= 1500
-        self.CHANNEL_USERNAME_LIST = ['hahujobs',
-                             'freelance_ethio', 'jobs_in_ethio', 'geezjob']
-        
+        self.LIMIT = 1500
+        self.SCRAPE_TELEGRAM= False
+        self.SCRAPE_AFRIWORKET= False
+        self.SCRAPE_HAHU_WEB= False
+        self.ADD_CATEGORY=False
+        self.FIX_TITLE_AFRIWORK=False
+        self.FIX_TITLE_GEEZJOB=False
+        self.FIX_TITLE_HAHU_TELEGRAM=False
+        self.EXPORT_AFRIWORK=True
+        self.EXPORT_ALL_JOBS=True
+        self.EXPORT_HAHU_WEB=True
+        self.CHANNEL_USERNAME_LIST = ['hahujobs','freelance_ethio', 'jobs_in_ethio', 'geezjob']
+
 
 class TelegramChannelScraper:
 
@@ -31,7 +43,7 @@ class TelegramChannelScraper:
         self.api_hash = api_hash
         self.phone_number = phone_number
         self.client = TelegramClient(
-            'session', api_id,api_hash)
+            'session', api_id, api_hash)
         try:
 
             self.mongo_client = MongoClient(mongo_uri)
@@ -93,15 +105,15 @@ class TelegramChannelScraper:
 
             try:
                 self.channels_collection.update_one(
-                    {"channel_id": entity.id},
-                    {"$set": info},
+                    {'channel_id': entity.id},
+                    {'$set': info},
                     upsert=True
                 )
                 print(f"Channel info saved to MongoDB: {info['title']}")
-
             except Exception as e:
                 print(f"Error saving channel info to MongoDB: {e}")
 
+            return info
         except Exception as e:
             print(f"Error getting channel info: {e}")
             return None
@@ -311,6 +323,7 @@ class TelegramChannelScraper:
             cursor = cursor.limit(limit)
 
         return list(cursor)
+
     def get_channel_stats(self, channel_username):
         """Get statistics for a channel from MongoDB"""
         channel_username_clean = channel_username.replace('@', '')
@@ -331,6 +344,7 @@ class TelegramChannelScraper:
 
         result = list(self.messages_collection.aggregate(pipeline))
         return result[0] if result else None
+
     def close_db_connection(self):
         """Close MongoDB connection"""
         self.mongo_client.close()
@@ -341,41 +355,200 @@ class TelegramChannelScraper:
         await self.client.disconnect()
         self.close_db_connection()
 
-
 async def main():
-
-    config=Config()
-
+    print("Starting Job Scraper Application")
+    print("=" * 60)
+    
+    config = Config()
+    
     scraper = TelegramChannelScraper(
         config.API_ID, config.API_HASH, config.PHONE_NUMBER, config.MONGO_URI, config.DB_NAME)
-    
+
     try:
+        print("Connecting to Telegram API...")
         await scraper.connect_and_authenticate()
-        print("Connected to Telegram successfully!")
-        channel_usernames = config.CHANNEL_USERNAME_LIST
-        for channel_username in channel_usernames:
-            print(f"\nGetting channel info for {channel_username}...")
-            channel_info = await scraper.get_channel_info(channel_username)
-            if channel_info:
-                print(f"Channel: {channel_info['title']}")
-                print(f"Participants: {channel_info['participants_count']}")
-                print(
-                    f"Description: {channel_info['description'][:100]}..." if channel_info['description'] else "No description")
+        print("Successfully connected to Telegram!")
+        
+        if config.SCRAPE_TELEGRAM:
+            print("\nTELEGRAM CHANNEL SCRAPING")
+            print("-" * 40)
+            
+            channel_usernames = config.CHANNEL_USERNAME_LIST
+            total_channels = len(channel_usernames)
+            
+            for idx, channel_username in enumerate(channel_usernames, 1):
+                print(f"\nProcessing Channel {idx}/{total_channels}: @{channel_username}")
+                
+                # Get channel info
+                print(f"   Fetching channel information...")
+                channel_info = await scraper.get_channel_info(channel_username)
+                
+                if channel_info:
+                    print(f"   Channel: {channel_info['title']}")
+                    print(f"   Participants: {channel_info['participants_count']:,}")
+                    
+                    if channel_info['description']:
+                        desc_preview = channel_info['description'][:100]
+                        print(f"   Description: {desc_preview}{'...' if len(channel_info['description']) > 100 else ''}")
+                    else:
+                        print(f"   Description: No description available")
+                else:
+                    print(f"   ERROR: Failed to retrieve channel information")
+                    continue
 
-            print(f"\nGetting messages from {channel_username}...")
-            messages = await scraper.get_channel_messages(channel_username, limit=config.LIMIT, save_to_db=True)
-            print(f"Retrieved {len(messages)} messages")
+                # Get messages
+                print(f"   Retrieving messages (limit: {config.LIMIT})...")
+                messages = await scraper.get_channel_messages(channel_username, limit=config.LIMIT, save_to_db=True)
+                print(f"   Successfully retrieved and saved {len(messages):,} messages")
 
-            print("\nGetting statistics from database...")
-            stats = scraper.get_channel_stats(channel_username)
-            await scraper.update_channel_stats(channel_info["channel_id"], stats)
+                # Get and update statistics
+                print(f"   Calculating channel statistics...")
+                stats = scraper.get_channel_stats(channel_username)
+                await scraper.update_channel_stats(channel_info["channel_id"], stats)
+                print(f"   Channel statistics updated")
 
-            # participants = await scraper.get_channel_participants(channel_username, save_to_db=True)
-            # print(f"Retrieved {len(participants)} participants")
+                # Uncommented participants scraping (if needed)
+                # print(f"   Retrieving channel participants...")
+                # participants = await scraper.get_channel_participants(channel_username, save_to_db=True)
+                # print(f"   Retrieved {len(participants):,} participants")
+            
+            print(f"\nTelegram scraping completed! Processed {total_channels} channels")
+        
+        if config.SCRAPE_AFRIWORKET:
+            print("\nAFRIWORKET MINI APP SCRAPING")
+            print("-" * 40)
+            print("Starting Afriworket mini app scraper...")
+            
+            afriworketMiniAppScraper = AfriworketMiniAppScraper(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="messages"
+            )
+            afriworketMiniAppScraper.run()
+            
+            print("Afriworket mini app scraping completed successfully!")
+            print("=" * 50)
+        
+        if config.SCRAPE_HAHU_WEB:
+            print("\nHAHU WEBSITE SCRAPING")
+            print("-" * 40)
+            print("Starting Hahu website scraper...")
+            
+            hahuWebSiteScraper = HahuWebSiteScraper(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="huhu"
+            )
+            hahuWebSiteScraper.run()
+            
+            print("Hahu website scraping completed successfully!")
+            print("=" * 50)
+        
+        if config.FIX_TITLE_AFRIWORK:
+            print("\nFIXING AFRIWORK TITLES AND CATEGORIES")
+            print("-" * 40)
+            print("Extracting titles and labeling categories for Afriwork data...")
+            
+            extractTitleAndLabelCategoryAfriwork = ExtractTitleAndLabelCategoryAfriwork(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="messages"
+            )
+            extractTitleAndLabelCategoryAfriwork.run()
+            
+            print("Afriwork title extraction and category labeling completed!")
+            print("=" * 50)
+        if config.FIX_TITLE_GEEZJOB:
+            print("\nFIXING GEEZJOB TITLES AND CATEGORIES")
+            print("-" * 40)
+            print("Extracting titles and labeling categories for Afriwork data...")
+            
+            extractTitleAndLabelCategoryAfriwork = ExtractTitleAndLabelCategoryAfriwork(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="messages"
+            )
+            extractTitleAndLabelCategoryAfriwork.run(channel_username = "geezjob")
+            
+            print("GEEZJOB title extraction and category labeling completed!")
+            print("=" * 50)
+        if config.FIX_TITLE_HAHU_TELEGRAM:
+            print("\nFIXING HAHU TITLES AND CATEGORIES")
+            print("-" * 40)
+            print("Extracting titles and labeling categories for Afriwork data...")
+            
+            extractTitleAndLabelCategoryAfriwork = ExtractTitleAndLabelCategoryAfriwork(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="messages"
+            )
+            extractTitleAndLabelCategoryAfriwork.run(channel_username = "hahujobs")
+            
+            print("HAHU title extraction and category labeling completed!")
+            print("=" * 50)
+        
+        
+        if config.ADD_CATEGORY:
+            print("\nADDING CATEGORIES TO DATA")
+            print("-" * 40)
+            
+            print("Adding categories to Hahu data...")
+            extractAndAddCategoryHahu = ExtractAndAddCategory(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="huhu"
+            )
+            extractAndAddCategoryHahu.run()
+            print("Hahu category extraction completed!")
+            
+            print("Adding categories to Messages data...")
+            extractAndAddCategoryMessages = ExtractAndAddCategory(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="messages"
+            )
+            extractAndAddCategoryMessages.run()
+            print("Messages category extraction completed!")
+            print("=" * 50)
+        
+        if config.EXPORT_AFRIWORK:
+            print("\nEXPORTING AFRIWORK DATA")
+            print("-" * 40)
+            print("Exporting Afriwork jobs to CSV format...")
+            
+            afriworkToCsv = AfriworkToCsv(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="messages"
+            )
+            afriworkToCsv.export_jobs_to_csv(get_all_jobs=config.EXPORT_ALL_JOBS)
+            
+            print("Afriwork data export to CSV completed!")
+            print("=" * 50)
+        
+        if config.EXPORT_HAHU_WEB:
+            print("\nEXPORTING HAHU DATA")
+            print("-" * 40)
+            print("Exporting Hahu jobs to CSV format...")
+            
+            hahuToCsv = HahuToCsv(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="huhu"
+            )
+            hahuToCsv.export_jobs_to_csv()
+            
+            print("Hahu data export to CSV completed!")
+            print("=" * 50)
+        
+        
+        print("\nALL OPERATIONS COMPLETED SUCCESSFULLY!")
+        print("=" * 60)
         
     except Exception as e:
-        print(f"An error occurred: {e}")
-
+        print(f"\nERROR: An unexpected error occurred: {str(e)}")
+        print("=" * 60)
+        
     finally:
         await scraper.disconnect()
         print("Disconnected from Telegram and MongoDB")

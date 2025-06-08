@@ -1,11 +1,12 @@
 import requests
 import json
-from pymongo import MongoClient,UpdateOne
+from pymongo import MongoClient, UpdateOne
 import random
 import time
 import requests
 
-def fetch_jobs(limit=1000,offset= 0):
+
+def fetch_jobs(limit=1000, offset=0):
     url = "https://graph.aggregator.hahu.jobs/v1/graphql"
     query = f"""
     query MyQuery {{
@@ -77,7 +78,9 @@ def fetch_jobs(limit=1000,offset= 0):
         else:
             return data["data"]["jobs"]
     else:
-        raise Exception(f"GraphQL query failed with status code {response.status_code}: {response.text}")
+        raise Exception(
+            f"GraphQL query failed with status code {response.status_code}: {response.text}")
+
 
 def save_job_reply_markup_with_details(mongo_uri, db_name, collection_name, details):
     client = MongoClient(mongo_uri)
@@ -92,17 +95,19 @@ def save_job_reply_markup_with_details(mongo_uri, db_name, collection_name, deta
     if operations:
         collection.bulk_write(operations)
     client.close()
+
+
 if __name__ == "__main__":
     mongo_uri = "mongodb://localhost:27017/"
     db_name = "telegram"
     collection_name = "huhu"
-    has_data= True
+    has_data = True
     client = MongoClient(mongo_uri)
     db = client[db_name]
     collection = db[collection_name]
     collection.create_index("id", unique=True)
     offset = 0
-    limit = 1000 
+    limit = 1000
     while has_data:
         try:
             print("Fetching job details...")
@@ -112,12 +117,12 @@ if __name__ == "__main__":
                 save_job_reply_markup_with_details(
                     mongo_uri, db_name, collection_name, result
                 )
-                offset+=limit 
+                offset += limit
             else:
-                has_data= False
+                has_data = False
         except Exception as e:
             print(e)
-            has_data= False
+            has_data = False
         sleep_duration = random.uniform(0, 1)
         print(f"⏱ Sleeping for {sleep_duration:.2f} seconds...\n")
         time.sleep(sleep_duration)
