@@ -22,21 +22,21 @@ class Config:
         self.PHONE_NUMBER = '+49151759448'
         self.MONGO_URI = "mongodb://localhost:27017/"
         self.DB_NAME = "telegram"
-        self.LIMIT = 1500
-        self.SCRAPE_TELEGRAM= False
-        self.SCRAPE_AFRIWORKET= False
-        self.SCRAPE_HAHU_WEB= False
-        self.ADD_CATEGORY=False
-        self.FIX_TITLE_AFRIWORK=False
+        self.LIMIT = 500
+        self.SCRAPE_TELEGRAM= True
+        self.SCRAPE_AFRIWORKET= True
+        self.SCRAPE_HAHU_WEB= True
+        self.ADD_CATEGORY=True
+        self.FIX_TITLE_AFRIWORK=True
         self.FIX_TITLE_GEEZJOB=True
-        self.FIX_TITLE_LINKEDIN=False
-        self.FIX_TITLE_HAHU_TELEGRAM=False
+        self.FIX_TITLE_LINKEDIN=True
+        self.FIX_TITLE_HAHU_TELEGRAM=True
         self.EXPORT_CHART=True
-        self.EXPORT_AFRIWORK=False
-        self.EXPORT_ALL_JOBS=False
-        self.EXPORT_HAHU_WEB=False
-        self.EXPORT_LINKEDIN=False
-        self.CHANNEL_USERNAME_LIST = ['hahujobs','freelance_ethio', 'jobs_in_ethio', 'geezjob']
+        self.EXPORT_AFRIWORK=True
+        self.EXPORT_ALL_JOBS=True
+        self.EXPORT_HAHU_WEB=True
+        self.EXPORT_LINKEDIN=True
+        self.CHANNEL_USERNAME_LIST = ['hahujobs','freelance_ethio', 'geezjob']
 
 
 class TelegramChannelScraper:
@@ -374,22 +374,22 @@ async def main():
         print("Successfully connected to Telegram!")
         
         if config.SCRAPE_TELEGRAM:
-            print("\nTELEGRAM CHANNEL SCRAPING")
+            print("\n TELEGRAM CHANNEL SCRAPING")
             print("-" * 40)
             
             channel_usernames = config.CHANNEL_USERNAME_LIST
             total_channels = len(channel_usernames)
             
             for idx, channel_username in enumerate(channel_usernames, 1):
-                print(f"\nProcessing Channel {idx}/{total_channels}: @{channel_username}")
+                print(f"\n Processing Channel {idx}/{total_channels}: @{channel_username}")
                 
                 # Get channel info
-                print(f"   Fetching channel information...")
+                print(f" Fetching channel information...")
                 channel_info = await scraper.get_channel_info(channel_username)
                 
                 if channel_info:
                     print(f"   Channel: {channel_info['title']}")
-                    print(f"   Participants: {channel_info['participants_count']:,}")
+                    # print(f"   Participants: {channel_info['participants_count']:,}")
                     
                     if channel_info['description']:
                         desc_preview = channel_info['description'][:100]

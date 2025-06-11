@@ -149,7 +149,7 @@ class JobPostingsVisualizer:
             plt.tight_layout()
             plt.savefig(f'job_postings_telegram_by_date.png', dpi=300, bbox_inches='tight')
             
-
+        self.collection.delete_many({"category": {"$eq": None}})
         # 3️⃣ By category
         pipeline_category = [
             {"$group": {"_id": "$category", "count": {"$sum": 1}}},
