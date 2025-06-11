@@ -122,11 +122,10 @@ def load_and_preprocess_data():
     """Load and preprocess the dataset"""
     logger.info("Loading dataset...")
     try:
-        data = pd.read_csv("telegram_output.csv")
+        data = pd.read_csv("job_output.csv")
         logger.info(
             f"Dataset loaded successfully: {data.shape[0]} rows, {data.shape[1]} columns")
 
-        # Check for missing values
         missing_data = data.isnull().sum()
         if missing_data.any():
             logger.warning(
@@ -137,11 +136,9 @@ def load_and_preprocess_data():
         X = data["combined_description_text"]
         y = data["title"]
 
-        # Basic data validation
         if len(X) == 0 or len(y) == 0:
             raise ValueError("Dataset is empty after preprocessing")
 
-        # Check data distribution
         logger.info(f"Total samples: {len(X)}")
         logger.info(f"Unique job titles: {y.nunique()}")
         logger.info(
@@ -165,16 +162,13 @@ def prepare_features_enhanced(X, y, train_ratio=0.7, val_ratio=0.15, test_ratio=
     logger.info(
         f"Enhanced data preparation with ratios - Train: {train_ratio}, Val: {val_ratio}, Test: {test_ratio}")
 
-    # Validate ratios
     if not np.isclose(train_ratio + val_ratio + test_ratio, 1.0):
         raise ValueError("Train, validation, and test ratios must sum to 1.0")
 
-    # Check class distribution
     class_counts = y.value_counts()
     logger.info(f"Original classes: {len(class_counts)}")
     logger.info(f"Class distribution (top 10):\n{class_counts.head(10)}")
 
-    # Handle rare classes
     rare_classes = class_counts[class_counts == 1]
     if len(rare_classes) > 0:
         logger.warning(
@@ -189,14 +183,11 @@ def prepare_features_enhanced(X, y, train_ratio=0.7, val_ratio=0.15, test_ratio=
             f"After removing rare classes: {len(X_filtered)} samples, {y_filtered.nunique()} classes")
         X, y = X_filtered, y_filtered
 
-    # Encode labels
     label_encoder = LabelEncoder()
     y_encoded = label_encoder.fit_transform(y)
 
     logger.info(f"Final number of classes: {len(label_encoder.classes_)}")
 
-    # Three-way split: Train-Val-Test
-    # First split: separate test set
     X_temp, X_test, y_temp, y_test = train_test_split(
         X, y_encoded,
         test_size=test_ratio,
@@ -204,8 +195,6 @@ def prepare_features_enhanced(X, y, train_ratio=0.7, val_ratio=0.15, test_ratio=
         stratify=y_encoded
     )
 
-    # Second split: separate train and validation from remaining data
-    # Adjust validation ratio for remaining data
     val_ratio_adjusted = val_ratio / (train_ratio + val_ratio)
 
     X_train, X_val, y_train, y_val = train_test_split(
@@ -222,7 +211,6 @@ def prepare_features_enhanced(X, y, train_ratio=0.7, val_ratio=0.15, test_ratio=
         f"  Validation set: {len(X_val)} ({len(X_val)/len(X)*100:.1f}%)")
     logger.info(f"  Test set: {len(X_test)} ({len(X_test)/len(X)*100:.1f}%)")
 
-    # Check class distribution in splits
     for split_name, split_data in [("Train", y_train), ("Val", y_val), ("Test", y_test)]:
         unique_classes = len(np.unique(split_data))
         logger.info(f"  {split_name} set classes: {unique_classes}")
@@ -237,14 +225,13 @@ def vectorize_text_enhanced(X_train, X_val, X_test, X_all):
 
     tfidf = TfidfVectorizer(
         stop_words='english',
-        max_features=2000,  # Increased features
-        ngram_range=(1, 3),  # Include trigrams
+        max_features=2000,  
+        ngram_range=(1, 3),  
         min_df=2,
         max_df=0.95,
-        sublinear_tf=True  # Apply sublinear scaling
+        sublinear_tf=True  
     )
 
-    # Fit on training data only
     X_train_tfidf = tfidf.fit_transform(X_train)
     X_val_tfidf = tfidf.transform(X_val)
     X_test_tfidf = tfidf.transform(X_test)
@@ -915,7 +902,7 @@ def generate_detailed_report(results, cv_results, clustering_results, label_enco
         report.append("✅ Good performance achieved.")
     elif best_accuracy > 0.7:
         report.append(
-            "⚠️  Moderate performance. Consider feature engineering or more data.")
+            "Moderate performance. Consider feature engineering or more data.")
     else:
         report.append("❌ Low performance. Significant improvements needed.")
 
@@ -1013,7 +1000,7 @@ def main():
     try:
         setup_environment()
         logger.info("🚀 Starting Enhanced ML Pipeline")
-        bertTrainer = BertTrainer(csv_path="telegram_output.csv")
+        bertTrainer = BertTrainer(csv_path="job_output.csv")
         bertTrainer.train_model()
         logger.info("BertTrainer Train data")
 

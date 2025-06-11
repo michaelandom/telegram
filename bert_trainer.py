@@ -70,7 +70,7 @@ class BertTrainer:
                  max_length: int = 128,
                  batch_size: int = 16,
                  learning_rate: float = 2e-5,
-                 epochs: int = 3,
+                 epochs: int = 4,
                  test_size: float = 0.2,
                  random_state: int = 42,
                  output_dir: str = "bert_output",

@@ -12,7 +12,6 @@ class AfriworkToCsv:
         self.output_file = output_file
 
     def export_jobs_to_csv(self, get_all_jobs= False):
-        print(f"get_all_jobs {get_all_jobs}")
         query = {"job_detail_for_markup_url.data": {"$exists": True}}
         if get_all_jobs:
             query = {"title": {"$ne": ""},"category":{"$ne": ""}}
@@ -31,7 +30,8 @@ class AfriworkToCsv:
                 print(f"Skipping document due to error: {e}")
 
         df = pd.DataFrame(data)
-        df.to_csv(self.output_file, index=False)
+        unique_df = df.drop_duplicates(subset=['combined_description_text'], keep='first')
+        unique_df.to_csv(self.output_file, index=False)
         print(f"CSV created: {self.output_file}")
 
     def clean_description(self,description):
@@ -44,3 +44,14 @@ class AfriworkToCsv:
             description = description.strip()
             description = f"{description}"
         return description
+    def merge_csv_without_duplicates(self,file1_path, file2_path,file3_path, output_path):
+        df1 = pd.read_csv(file1_path)
+        df2 = pd.read_csv(file2_path)
+        df3 = pd.read_csv(file3_path)
+
+        combined_df = pd.concat([df1, df2,df3], ignore_index=True)
+
+        unique_df = combined_df.drop_duplicates(subset=['combined_description_text'], keep='first')
+
+        unique_df.to_csv(output_path, index=False)
+        print(f"Merged file saved to {output_path}. Removed {len(combined_df) - len(unique_df)} duplicate descriptions.")

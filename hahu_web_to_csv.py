@@ -12,7 +12,7 @@ class HahuToCsv:
         self.output_file = output_file
 
     def export_jobs_to_csv(self):
-        query = {"category": {"$ne": "other"}}
+        query = {}
         data = []
 
         for doc in self.collection.find(query):
@@ -28,7 +28,8 @@ class HahuToCsv:
                 print(f"Skipping document due to error: {e}")
 
         df = pd.DataFrame(data)
-        df.to_csv(self.output_file, index=False)
+        unique_df = df.drop_duplicates(subset=['combined_description_text'], keep='first')
+        unique_df.to_csv(self.output_file, index=False)
         print(f"CSV created: {self.output_file}")
 
     def clean_description(self,description):

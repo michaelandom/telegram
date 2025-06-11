@@ -53,6 +53,13 @@ class ExtractTitleAndLabelCategoryAfriwork:
         if match:
             return match.group("title").strip()
         text = remove_expired_line(text)
+        position_match = re.search(r'\*\*Position:\*\*\s*(.+)', text, re.IGNORECASE)
+        if position_match:
+            return position_match.group(1).strip()
+
+        position_match_alt = re.search(r'Position:\s*(.+)', text, re.IGNORECASE)
+        if position_match_alt:
+            return position_match_alt.group(1).strip()
         pattern_bold_title = r'^\s*(\*\*|\*)(?P<title>.+?)(\*\*|\*)\s*$'
         lines = text.strip().splitlines()
         if lines:
@@ -60,6 +67,9 @@ class ExtractTitleAndLabelCategoryAfriwork:
             match_bold = re.search(pattern_bold_title, first_line)
             if match_bold:
                 return match_bold.group("title").strip()
+            
+            first_line= lines[0].replace(":","")
+            return first_line.strip()
         return None
 
     def load_categories(self):
@@ -88,6 +98,8 @@ class ExtractTitleAndLabelCategoryAfriwork:
             self.geezjob()
         elif channel_username == "hahujobs":
             self.hahujobs()
+        elif channel_username == "linkedin_jobs":
+            self.linkedinJobs()
 
         print("Combined job descriptions saved to combined.txt")
     def freelance_ethio(self):
@@ -153,7 +165,28 @@ class ExtractTitleAndLabelCategoryAfriwork:
                 self.collection.update_one(
                     {"_id": doc["_id"]},
                     {"$set": {"title": title, "category": category, }})
+  
+    def linkedinJobs(self):
+        query = {}
+
+        documents = self.collection.find(query)
+        cs_categorize = self.load_categories()
+        for doc in documents:
+            text = doc.get("job_description", "")
+            title = doc.get("job_title", "")
+            category = None
+            if title:
+                category = self.categorize_job_title(title, text,cs_categorize)
+            if text:
+                text= remove_text_line(text)
+            self.collection.update_one(
+                    {"_id": doc["_id"]},
+                    {"$set": {"title": title, "category": category, "combined_description_text":  text}})
 
 def remove_expired_line(text):
     text = text.replace('- - EXPIRED - -','')
+    return text
+def remove_text_line(text):
+    text = text.replace('Show more','')
+    text = text.replace('Show less','')
     return text

@@ -14,6 +14,7 @@ from extract_and_add_category import ExtractAndAddCategory
 from extract_title_and_label_categories_jobs import ExtractTitleAndLabelCategoryAfriwork
 from afriwork_to_csv import AfriworkToCsv
 from hahu_web_to_csv import HahuToCsv
+from job_postings_aggregation import JobPostingsVisualizer
 class Config:
     def __init__(self):
         self.API_ID = '29511239'
@@ -27,11 +28,14 @@ class Config:
         self.SCRAPE_HAHU_WEB= False
         self.ADD_CATEGORY=False
         self.FIX_TITLE_AFRIWORK=False
-        self.FIX_TITLE_GEEZJOB=False
+        self.FIX_TITLE_GEEZJOB=True
+        self.FIX_TITLE_LINKEDIN=False
         self.FIX_TITLE_HAHU_TELEGRAM=False
-        self.EXPORT_AFRIWORK=True
-        self.EXPORT_ALL_JOBS=True
-        self.EXPORT_HAHU_WEB=True
+        self.EXPORT_CHART=True
+        self.EXPORT_AFRIWORK=False
+        self.EXPORT_ALL_JOBS=False
+        self.EXPORT_HAHU_WEB=False
+        self.EXPORT_LINKEDIN=False
         self.CHANNEL_USERNAME_LIST = ['hahujobs','freelance_ethio', 'jobs_in_ethio', 'geezjob']
 
 
@@ -461,7 +465,7 @@ async def main():
         if config.FIX_TITLE_GEEZJOB:
             print("\nFIXING GEEZJOB TITLES AND CATEGORIES")
             print("-" * 40)
-            print("Extracting titles and labeling categories for Afriwork data...")
+            print("Extracting titles and labeling categories for GEEZJOB data...")
             
             extractTitleAndLabelCategoryAfriwork = ExtractTitleAndLabelCategoryAfriwork(
                 mongo_uri=config.MONGO_URI, 
@@ -471,6 +475,20 @@ async def main():
             extractTitleAndLabelCategoryAfriwork.run(channel_username = "geezjob")
             
             print("GEEZJOB title extraction and category labeling completed!")
+            print("=" * 50)
+        if config.FIX_TITLE_LINKEDIN:
+            print("\nFIXING LINKEDIN TITLES AND CATEGORIES")
+            print("-" * 40)
+            print("Extracting titles and labeling categories for LINKEDIN data...")
+            
+            extractTitleAndLabelCategoryAfriwork = ExtractTitleAndLabelCategoryAfriwork(
+                mongo_uri=config.MONGO_URI, 
+                db_name="linkedin_jobs", 
+                collection_name="jobs"
+            )
+            extractTitleAndLabelCategoryAfriwork.run(channel_username = "linkedin_jobs")
+            
+            print("LINKEDIN title extraction and category labeling completed!")
             print("=" * 50)
         if config.FIX_TITLE_HAHU_TELEGRAM:
             print("\nFIXING HAHU TITLES AND CATEGORIES")
@@ -487,7 +505,58 @@ async def main():
             print("HAHU title extraction and category labeling completed!")
             print("=" * 50)
         
-        
+        if config.EXPORT_CHART:
+            
+            print("\nEXPORT CHART for  messages")
+            print("-" * 40)
+            
+            print("Adding EXPORT CHART to messages data...")
+            jobPostingsVisualizer = JobPostingsVisualizer(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="messages"
+            )
+            jobPostingsVisualizer.aggregate_and_plot_from_messages()
+            print("EXPORT CHART messages extraction completed!")
+
+            print("\nEXPORT CHART for  hahu")
+            print("-" * 40)
+            
+            print("Adding EXPORT CHART to hahu data...")
+            jobPostingsVisualizer = JobPostingsVisualizer(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="huhu"
+            )
+            jobPostingsVisualizer.aggregate_and_plot_hahu()
+            print("EXPORT CHART hahu extraction completed!")
+
+            print("\naggregate_and_plot_linkedin for  linkedin_job")
+            print("-" * 40)
+            
+            print("Adding aggregate_and_plot_linkedin to linkedin_job data...")
+            jobPostingsVisualizer = JobPostingsVisualizer(
+                mongo_uri=config.MONGO_URI, 
+                db_name="linkedin_job", 
+                collection_name="jobs"
+            )
+            jobPostingsVisualizer.aggregate_and_plot_linkedin()
+            print("aggregate_and_plot_linkedin linkedin_job extraction completed!")
+
+
+            print("plot_channel_summary for  telegram")
+            print("-" * 40)
+            
+            print("Adding plot_channel_summary to linkedin_job data...")
+            jobPostingsVisualizer = JobPostingsVisualizer(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="channels"
+            )
+            jobPostingsVisualizer.plot_channel_summary()
+            print("plot_channel_summary linkedin_job extraction completed!")
+
+
         if config.ADD_CATEGORY:
             print("\nADDING CATEGORIES TO DATA")
             print("-" * 40)
@@ -511,21 +580,6 @@ async def main():
             print("Messages category extraction completed!")
             print("=" * 50)
         
-        if config.EXPORT_AFRIWORK:
-            print("\nEXPORTING AFRIWORK DATA")
-            print("-" * 40)
-            print("Exporting Afriwork jobs to CSV format...")
-            
-            afriworkToCsv = AfriworkToCsv(
-                mongo_uri=config.MONGO_URI, 
-                db_name=config.DB_NAME, 
-                collection_name="messages"
-            )
-            afriworkToCsv.export_jobs_to_csv(get_all_jobs=config.EXPORT_ALL_JOBS)
-            
-            print("Afriwork data export to CSV completed!")
-            print("=" * 50)
-        
         if config.EXPORT_HAHU_WEB:
             print("\nEXPORTING HAHU DATA")
             print("-" * 40)
@@ -540,6 +594,43 @@ async def main():
             
             print("Hahu data export to CSV completed!")
             print("=" * 50)
+        if config.EXPORT_AFRIWORK:
+            print("\nEXPORTING AFRIWORK DATA")
+            print("-" * 40)
+            print("Exporting Afriwork jobs to CSV format...")
+            
+            afriworkToCsv = AfriworkToCsv(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="messages"
+            )
+            afriworkToCsv.export_jobs_to_csv(get_all_jobs=config.EXPORT_ALL_JOBS)
+            
+            print("Afriwork data export to CSV completed!")
+            print("=" * 50)
+        if config.EXPORT_LINKEDIN:
+            print("\nEXPORTING LINKEDIN DATA")
+            print("-" * 40)
+            print("Exporting LINKEDIN jobs to CSV format...")
+            
+            afriworkToCsv = AfriworkToCsv(
+                mongo_uri=config.MONGO_URI, 
+                db_name="linkedin_jobs", 
+                collection_name="jobs",
+                output_file="linkedin_output.csv"
+            )
+            afriworkToCsv.export_jobs_to_csv(get_all_jobs=True)
+            
+            print("LINKEDIN data export to CSV completed!")
+            print("=" * 50)
+        
+            if config.EXPORT_ALL_JOBS:
+                print("\nEXPORTING ALL JOB into one csv")
+                print("-" * 40)
+                print("Exporting All Jobs to CSV format...")
+                afriworkToCsv.merge_csv_without_duplicates("hahu_output.csv","telegram_output.csv","linkedin_output.csv","job_output.csv")
+                print("ALL JOB export to CSV completed!")
+                print("=" * 50)
         
         
         print("\nALL OPERATIONS COMPLETED SUCCESSFULLY!")
