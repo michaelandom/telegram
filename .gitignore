@@ -1,5 +1,6 @@
 *.csv
 .env
+/old
 /bert_output
 /bert_output2
 /bert_output3
