@@ -1,8 +1,8 @@
 *.csv
 .env
-/old
-/bert_output
-/bert_output2
-/bert_output3
-/models
-/bert_output_micros
+/old/
+/bert_output/
+/bert_output2/
+/bert_output3/
+/models/
+/bert_output_micros/
