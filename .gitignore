@@ -7,3 +7,4 @@
 /models/
 /bert_output_micros/
 /.venv/
+/__pycache__/
