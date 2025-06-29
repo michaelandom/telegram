@@ -10,8 +10,8 @@ from tqdm import tqdm
 import torch.nn.functional as F
 
 # Constants
-MODEL_DIR = "bert_output2/best_model"
-LABEL_MAP_FILE = "bert_output2/label_mapping.json"
+MODEL_DIR = "bert_output/best_model"
+LABEL_MAP_FILE = "bert_output/label_mapping.json"
 MONGO_URI = "mongodb://localhost:27017"
 DB_NAME = "telegram"
 COLLECTION_NAME = "jobs"

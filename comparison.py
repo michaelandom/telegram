@@ -13,7 +13,6 @@ def update_view(collection):
     pipeline = [
         {
             "$match": {
-                "predicted_job_title_roberta_model": {"$exists": True},
                 "predicted_job_title_xgb_model": {"$exists": True},
                 "predicted_job_title_bert_model": {"$exists": True}
             }
@@ -21,26 +20,19 @@ def update_view(collection):
         {
             "$addFields": {
                 "final_prediction_label": {
-                    "$cond": [
-                        {"$eq": ["$predicted_job_title_bert_model",
-                                 "$predicted_job_title_xgb_model"]},
-                        "$predicted_job_title_xgb_model",
-                        {
-                            "$cond": [
-                                {"$eq": ["$predicted_job_title_roberta_model",
-                                         "$predicted_job_title_bert_model"]},
-                                "$predicted_job_title_roberta_model",
-                                {
-                                    "$cond": [
-                                        {"$eq": ["$predicted_job_title_xgb_model",
-                                                 "$predicted_job_title_roberta_model"]},
-                                        "$predicted_job_title_xgb_model",
-                                        "$predicted_job_title_xgb_model"
-                                    ]
-                                }
+                    "$cond": {
+                        "if": {
+                            "$in": [
+                                "$predicted_job_title_xgb_model",
+                                [
+                                    "other",
+                                    "Product / Project Management (Technical)"
+                                ]
                             ]
-                        }
-                    ]
+                        },
+                        "then": "$predicted_job_title_xgb_model",
+                        "else": "$predicted_job_title_bert_model"
+                    }
                 }
             }
         },
@@ -138,17 +130,29 @@ def per_category_accuracy(collection):
         {"$sort": {"total_jobs": -1}}
     ]
     results = list(collection.aggregate(pipeline))
-    total_correct = 0
+    total_xgb_correct = 0
+    total_bert_correct = 0
+    total_RoBERTa_correct = 0
     total_jobs = 0
 
     for entry in results:
         correct = entry["xgb_accuracy"] * entry["total_jobs"]
-        total_correct += correct
+        total_xgb_correct += correct
+        correct = entry["bert_accuracy"] * entry["total_jobs"]
+        total_bert_correct += correct
+        correct = entry["roberta_accuracy"] * entry["total_jobs"]
+        total_RoBERTa_correct += correct
         total_jobs += entry["total_jobs"]
 
-    overall_accuracy = total_correct / total_jobs if total_jobs > 0 else 0
+    overall_accuracy = total_xgb_correct / total_jobs if total_jobs > 0 else 0
     print(
-        f"\n Overall Accuracy: {overall_accuracy:.4f} ({total_correct:.0f}/{total_jobs})")
+        f"\n Overall Accuracy of xgb: {overall_accuracy:.4f} ({total_xgb_correct:.0f}/{total_jobs})")
+    overall_accuracy = total_bert_correct / total_jobs if total_jobs > 0 else 0
+    print(
+        f"\n Overall Accuracy of bert: {overall_accuracy:.4f} ({total_bert_correct:.0f}/{total_jobs})")
+    overall_accuracy = total_RoBERTa_correct / total_jobs if total_jobs > 0 else 0
+    print(
+        f"\n Overall Accuracy of RoBERTa: {overall_accuracy:.4f} ({total_RoBERTa_correct:.0f}/{total_jobs})")
 
     return results
 
@@ -374,7 +378,7 @@ def main():
     db = client[DATABASE_NAME]
     collection = db[COLLECTION_NAME]
     # === update view ===
-    
+
     update_view(collection)
 
     # === Per-category Accuracy ===
