@@ -9,7 +9,6 @@ import os
 from tqdm import tqdm
 import torch.nn.functional as F
 
-# Constants
 MODEL_DIR = "bert_output/best_model"
 LABEL_MAP_FILE = "bert_output/label_mapping.json"
 MONGO_URI = "mongodb://localhost:27017"
@@ -22,13 +21,11 @@ MAX_LENGTH = 128
 BATCH_SIZE = 1000
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Load model and tokenizer
 tokenizer = BertTokenizer.from_pretrained(MODEL_DIR)
 model = BertForSequenceClassification.from_pretrained(MODEL_DIR)
 model = model.to(DEVICE)
 model.eval()
 
-# Load label mapping
 with open(LABEL_MAP_FILE, "r") as f:
     label_mapping = json.load(f)
 
@@ -75,12 +72,10 @@ def predict_and_update_mongodb():
     """Reads data from MongoDB, predicts labels, and updates documents."""
     start_total = time.time()
 
-    # Connect to MongoDB
     client = MongoClient(MONGO_URI)
     db = client[DB_NAME]
     collection = db[COLLECTION_NAME]
 
-    # Fetch documents with non-empty text field
     cursor = collection.find({TEXT_FIELD: {"$exists": True, "$ne": ""}})
     docs = list(cursor)
 
@@ -94,7 +89,6 @@ def predict_and_update_mongodb():
 
     predictions, confidences = classify_texts(texts)
 
-    # Update predictions back to MongoDB
     for doc, pred, conf in zip(docs, predictions, confidences):
         collection.update_one(
             {"_id": doc["_id"]},
