@@ -1,4 +1,5 @@
 *.csv
+!jobs_outputs.csv
 .env
 /old/
 /bert_output/
