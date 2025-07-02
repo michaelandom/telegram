@@ -8,7 +8,8 @@ MONGO_URI = "mongodb://localhost:27017"
 DATABASE_NAME = "telegram"
 COLLECTION_NAME = "jobs"
 
-
+model_mapping= {}
+xgb_categories= []
 def update_view(collection):
     pipeline = [
         {
@@ -24,10 +25,11 @@ def update_view(collection):
                         "if": {
                             "$in": [
                                 "$predicted_job_title_xgb_model",
-                                [
-                                    "other",
-                                    "Product / Project Management (Technical)"
-                                ]
+                                xgb_categories
+                                # [
+                                #     "other",
+                                #     "Product / Project Management (Technical)"
+                                # ]
                             ]
                         },
                         "then": "$predicted_job_title_xgb_model",
@@ -136,6 +138,7 @@ def per_category_accuracy(collection):
     total_jobs = 0
 
     for entry in results:
+        model_mapping[entry["category"]]= "bert" if max(entry["xgb_accuracy"], entry["roberta_accuracy"]) < entry["bert_accuracy"] else "xgb" if max(entry["xgb_accuracy"], entry["roberta_accuracy"]) == entry["xgb_accuracy"] else "roberta"
         correct = entry["xgb_accuracy"] * entry["total_jobs"]
         total_xgb_correct += correct
         correct = entry["bert_accuracy"] * entry["total_jobs"]
@@ -143,7 +146,7 @@ def per_category_accuracy(collection):
         correct = entry["roberta_accuracy"] * entry["total_jobs"]
         total_RoBERTa_correct += correct
         total_jobs += entry["total_jobs"]
-
+    xgb_categories = [category for category, model in model_mapping.items() if model == 'xgb']
     overall_accuracy = total_xgb_correct / total_jobs if total_jobs > 0 else 0
     print(
         f"\n Overall Accuracy of xgb: {overall_accuracy:.4f} ({total_xgb_correct:.0f}/{total_jobs})")
@@ -379,7 +382,6 @@ def main():
     collection = db[COLLECTION_NAME]
     # === update view ===
 
-    update_view(collection)
 
     # === Per-category Accuracy ===
     per_cat = [c for c in per_category_accuracy(
@@ -389,6 +391,7 @@ def main():
     print(df_accuracy.to_string(index=False))
     plot_bar_chart(df_accuracy, "Per-Category Accuracy", "Accuracy",
                    ["roberta_accuracy", "xgb_accuracy", "bert_accuracy"], ['orange', 'green', 'red'])
+    update_view(collection)
     # === Per-category Accuracy with voting ===
     per_cat = [c for c in per_category_accuracy_with_voting(
         db) if c["category"] is not None]

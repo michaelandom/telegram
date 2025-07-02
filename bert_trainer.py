@@ -20,11 +20,9 @@ from typing import Tuple, Dict, Any
 import multiprocessing as mp
 import matplotlib.pyplot as plt
 import seaborn as sns
-# CRITICAL: Set multiprocessing start method to avoid segmentation faults
 if __name__ == "__main__":
     mp.set_start_method('spawn', force=True)
 
-# Suppress the expected BERT warning
 warnings.filterwarnings(
     "ignore", message="Some weights of BertForSequenceClassification were not initialized")
 
@@ -65,7 +63,7 @@ class BertTrainer:
     def __init__(self,
                  csv_path: str = "hahu_output.csv",
                  text_column: str = "combined_description_text",
-                 label_column: str = "title",
+                 label_column: str = "category",
                  model_name: str = "bert-base-uncased",
                  max_length: int = 128,
                  batch_size: int = 16,
@@ -430,7 +428,7 @@ def main():
     """Main function to be called from other files."""
     try:
         trainer = BertTrainer(
-            csv_path="hahu_output.csv",
+            csv_path="training_dataset.csv",
             epochs=5,
             batch_size=16,
             learning_rate=2e-5,

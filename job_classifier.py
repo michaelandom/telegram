@@ -82,7 +82,6 @@ class BertClassifier(BaseEstimator, ClassifierMixin):
         return all_probs
 
 
-# === Enhanced Logging Setup ===
 def setup_logging():
     """Setup comprehensive logging configuration"""
     log_filename = f"ml_pipeline_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
@@ -110,11 +109,9 @@ def timer_decorator(func):
     return wrapper
 
 
-# Initialize logging
 logger = setup_logging()
 logger.info("=== Enhanced ML Pipeline Starting ===")
 
-# === Data Loading and Preprocessing ===
 
 
 @timer_decorator
@@ -122,7 +119,7 @@ def load_and_preprocess_data():
     """Load and preprocess the dataset"""
     logger.info("Loading dataset...")
     try:
-        data = pd.read_csv("job_output.csv")
+        data = pd.read_csv("training_dataset.csv")
         logger.info(
             f"Dataset loaded successfully: {data.shape[0]} rows, {data.shape[1]} columns")
 
@@ -251,10 +248,8 @@ def calculate_comprehensive_metrics(y_true, y_pred, average_types=['macro', 'mic
     """Calculate comprehensive classification metrics"""
     metrics = {}
 
-    # Basic accuracy
     metrics['accuracy'] = accuracy_score(y_true, y_pred)
 
-    # Precision, Recall, F1 for different averaging methods
     for avg in average_types:
         metrics[f'precision_{avg}'] = precision_score(
             y_true, y_pred, average=avg, zero_division=0)
@@ -277,11 +272,9 @@ def perform_cross_validation(models, X_train_tfidf, y_train, cv_folds=5):
     for name, model in models.items():
         logger.info(f"Cross-validating {name}...")
         try:
-            # Accuracy scores
             cv_scores = cross_val_score(model, X_train_tfidf, y_train,
                                         cv=skf, scoring='accuracy', n_jobs=-1)
 
-            # F1 scores (macro average)
             f1_scores = cross_val_score(model, X_train_tfidf, y_train,
                                         cv=skf, scoring='f1_macro', n_jobs=-1)
 
@@ -327,7 +320,7 @@ def hyperparameter_tuning(X_train_tfidf, y_train, X_val_tfidf, y_val):
     lr_grid = GridSearchCV(
         LogisticRegression(random_state=42),
         lr_params,
-        cv=3,  # Reduced for speed
+        cv=3,  
         scoring='f1_macro',
         n_jobs=-1
     )
@@ -336,7 +329,6 @@ def hyperparameter_tuning(X_train_tfidf, y_train, X_val_tfidf, y_val):
     logger.info(f"Best LR params: {lr_grid.best_params_}")
     logger.info(f"Best LR CV score: {lr_grid.best_score_:.4f}")
 
-    # Random Forest hyperparameter tuning
     logger.info("Tuning Random Forest...")
     rf_params = {
         'n_estimators': [50, 100, 200],
@@ -348,7 +340,7 @@ def hyperparameter_tuning(X_train_tfidf, y_train, X_val_tfidf, y_val):
     rf_random = RandomizedSearchCV(
         RandomForestClassifier(random_state=42),
         rf_params,
-        n_iter=20,  # Limited iterations for speed
+        n_iter=20,  
         cv=3,
         scoring='f1_macro',
         n_jobs=-1,
@@ -391,7 +383,6 @@ def train_and_evaluate_models(X_train_tfidf, X_val_tfidf, X_test_tfidf,
     """Train and comprehensively evaluate models"""
     logger.info("Training and evaluating models with comprehensive metrics...")
 
-    # Base models
     base_models = {
         "Logistic Regression": LogisticRegression(max_iter=1000, random_state=42),
         "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
@@ -406,7 +397,6 @@ def train_and_evaluate_models(X_train_tfidf, X_val_tfidf, X_test_tfidf,
         "KNN": KNeighborsClassifier(n_neighbors=7)
     }
 
-    # Use tuned models if available
     if tuned_models:
         for name in tuned_models:
             base_models[f"{name}_Tuned"] = tuned_models[name]
@@ -419,18 +409,14 @@ def train_and_evaluate_models(X_train_tfidf, X_val_tfidf, X_test_tfidf,
         start_time = time.time()
 
         try:
-            # Train on training set
             model.fit(X_train_tfidf, y_train)
 
-            # Evaluate on validation set
             val_pred = model.predict(X_val_tfidf)
             val_metrics = calculate_comprehensive_metrics(y_val, val_pred)
 
-            # Evaluate on test set
             test_pred = model.predict(X_test_tfidf)
             test_metrics = calculate_comprehensive_metrics(y_test, test_pred)
 
-            # Store results
             results[name] = {
                 'validation': val_metrics,
                 'test': test_metrics,
@@ -438,7 +424,6 @@ def train_and_evaluate_models(X_train_tfidf, X_val_tfidf, X_test_tfidf,
             }
             trained_models[name] = model
 
-            # Log key metrics
             logger.info(f"{name} Results:")
             logger.info(
                 f"  Validation - Accuracy: {val_metrics['accuracy']:.4f}, F1-Macro: {val_metrics['f1_macro']:.4f}")
@@ -904,7 +889,7 @@ def generate_detailed_report(results, cv_results, clustering_results, label_enco
         report.append(
             "Moderate performance. Consider feature engineering or more data.")
     else:
-        report.append("❌ Low performance. Significant improvements needed.")
+        report.append("Low performance. Significant improvements needed.")
 
     report.append("")
     report.append("="*80)
@@ -940,7 +925,6 @@ def predict_new_job_enhanced(best_model_name, trained_models, dl_model, dl_metri
                 0]
             confidence = np.max(pred_proba)
 
-            # Get top 3 predictions
             top_indices = np.argsort(pred_proba[0])[-3:][::-1]
             top_predictions = [(label_encoder.inverse_transform([idx])[0], pred_proba[0][idx])
                                for idx in top_indices]
@@ -951,7 +935,6 @@ def predict_new_job_enhanced(best_model_name, trained_models, dl_model, dl_metri
             predicted_label = label_encoder.inverse_transform([predicted_class])[
                 0]
 
-            # Get prediction probabilities if available
             if hasattr(trained_models[best_model_name], 'predict_proba'):
                 proba = trained_models[best_model_name].predict_proba(new_vec)[
                     0]
@@ -1004,10 +987,8 @@ def main():
         bertTrainer.train_model()
         logger.info("BertTrainer Train data")
 
-        # Load and preprocess data
         X, y = load_and_preprocess_data()
 
-        # Enhanced feature preparation with train-val-test split
         X_train, X_val, X_test, y_train, y_val, y_test, label_encoder, X_filtered, y_filtered = prepare_features_enhanced(
             X, y, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15
         )
@@ -1023,7 +1004,6 @@ def main():
             X_train, X_val, X_test, X_filtered
         )
 
-        # Define base models for cross-validation
         base_models = {
             "Logistic Regression": LogisticRegression(max_iter=1000, random_state=42),
             "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
@@ -1034,38 +1014,31 @@ def main():
             "KNN": KNeighborsClassifier(n_neighbors=7)
         }
 
-        # Perform cross-validation
         cv_results = perform_cross_validation(
             base_models, X_train_tfidf, y_train)
 
-        # Hyperparameter tuning
         tuned_models = hyperparameter_tuning(
             X_train_tfidf, y_train, X_val_tfidf, y_val)
 
-        # Train and evaluate all models
         results, trained_models = train_and_evaluate_models(
             X_train_tfidf, X_val_tfidf, X_test_tfidf,
             y_train, y_val, y_test, tuned_models
         )
 
-        # Train enhanced deep learning model
         dl_metrics, dl_model, dl_history = train_deep_learning_model_enhanced(
             X_train_tfidf, X_val_tfidf, X_test_tfidf,
             y_train, y_val, y_test, len(label_encoder.classes_)
         )
 
-        # Add deep learning results
         results["Deep Learning"] = {
             'test': dl_metrics,
-            'training_time': 0.0  # Would need to track this separately
+            'training_time': 0.0  
         }
 
-        # Enhanced clustering analysis
         clustering_results, kmeans_labels = perform_clustering_enhanced(
             X_all_tfidf, label_encoder.transform(y_filtered)
         )
 
-        # Find best model
         best_model_name = max(results.keys(),
                               key=lambda x: results[x]['test']['accuracy'] if 'test' in results[x] else 0)
 
@@ -1075,21 +1048,17 @@ def main():
         logger.info(
             f"   Test F1-Macro: {results[best_model_name]['test']['f1_macro']:.4f}")
 
-        # Create comprehensive visualizations
         create_comprehensive_visualization(results, cv_results, dl_history)
 
-        # Create confusion matrix for best model
         if best_model_name != "Deep Learning":
             best_model = trained_models[best_model_name]
             test_pred = best_model.predict(X_test_tfidf)
             create_confusion_matrix_plot(
                 y_test, test_pred, label_encoder, best_model_name)
 
-        # Generate detailed report
         generate_detailed_report(
             results, cv_results, clustering_results, label_encoder)
 
-        # Enhanced prediction example
         new_job_example = """
         Yegna Trading PLC is seeking a motivated and experienced Commercial Manager to join our team.
         The successful candidate will be responsible for developing and implementing commercial strategies,
@@ -1102,7 +1071,6 @@ def main():
             tfidf, label_encoder, new_job_example
         )
 
-        # Final summary
         total_time = time.time() - total_start_time
         logger.info(
             f"\n⏱️  Total Enhanced Pipeline Execution Time: {total_time:.2f} seconds")
