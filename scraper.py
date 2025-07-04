@@ -14,6 +14,7 @@ from extract_and_add_category import ExtractAndAddCategory
 from extract_title_and_label_categories_jobs import ExtractTitleAndLabelCategoryAfriwork
 from afriwork_to_csv import AfriworkToCsv
 from hahu_web_to_csv import HahuToCsv
+from job_data_set import JobDataSet
 from job_postings_aggregation import JobPostingsVisualizer
 class Config:
     def __init__(self):
@@ -23,19 +24,20 @@ class Config:
         self.MONGO_URI = "mongodb://localhost:27017/"
         self.DB_NAME = "telegram"
         self.LIMIT = 500
-        self.SCRAPE_TELEGRAM= True
-        self.SCRAPE_AFRIWORKET= True
-        self.SCRAPE_HAHU_WEB= True
+        self.SCRAPE_TELEGRAM= False
+        self.SCRAPE_AFRIWORKET= False
+        self.SCRAPE_HAHU_WEB= False
         self.ADD_CATEGORY=True
         self.FIX_TITLE_AFRIWORK=True
         self.FIX_TITLE_GEEZJOB=True
         self.FIX_TITLE_LINKEDIN=True
         self.FIX_TITLE_HAHU_TELEGRAM=True
-        self.EXPORT_CHART=True
-        self.EXPORT_AFRIWORK=True
-        self.EXPORT_ALL_JOBS=True
-        self.EXPORT_HAHU_WEB=True
-        self.EXPORT_LINKEDIN=True
+        self.MOVE_ALL_JOBS=True
+        self.EXPORT_CHART=False
+        self.EXPORT_AFRIWORK=False
+        self.EXPORT_ALL_JOBS=False
+        self.EXPORT_HAHU_WEB=False
+        self.EXPORT_LINKEDIN=False
         self.CHANNEL_USERNAME_LIST = ['hahujobs','freelance_ethio', 'geezjob']
 
 
@@ -504,7 +506,68 @@ async def main():
             
             print("HAHU title extraction and category labeling completed!")
             print("=" * 50)
+
+        if config.ADD_CATEGORY:
+            print("\nADDING CATEGORIES TO DATA")
+            print("-" * 40)
+            
+            print("Adding categories to Hahu data...")
+            extractAndAddCategoryHahu = ExtractAndAddCategory(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="huhu"
+            )
+            extractAndAddCategoryHahu.run()
+            print("Hahu category extraction completed!")
+            
+            print("Adding categories to Messages data...")
+            extractAndAddCategoryMessages = ExtractAndAddCategory(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="messages"
+            )
+            extractAndAddCategoryMessages.run()
+            print("Messages category extraction completed!")
+            print("=" * 50)
         
+        if config.MOVE_ALL_JOBS:
+            
+            print("\nMove linkedin Data to job")
+            print("-" * 40)
+            
+            print("Move Data from linkedin data...")
+            extractAndAddCategoryHahu = JobDataSet(
+                mongo_uri=config.MONGO_URI, 
+                db_name="linkedin_jobs", 
+                collection_name="jobs"
+            )
+            extractAndAddCategoryHahu.move_job_from_linkedin()
+            print("linkedin  completed!")
+
+            print("\nMove Data to job")
+            print("-" * 40)
+            
+            print("Move Data from Hahu data...")
+            extractAndAddCategoryHahu = JobDataSet(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="huhu"
+            )
+            extractAndAddCategoryHahu.move_job_from_hahu_web()
+            print("Hahu  completed!")
+
+            print("\nMove Telegram Data to job")
+            print("-" * 40)
+            
+            print("Move Data from Telegram data...")
+            extractAndAddCategoryHahu = JobDataSet(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="messages"
+            )
+            extractAndAddCategoryHahu.move_job_from_message()
+            print("Telegram  completed!")
+
         if config.EXPORT_CHART:
             
             print("\nEXPORT CHART for  messages")
@@ -557,29 +620,6 @@ async def main():
             print("plot_channel_summary linkedin_job extraction completed!")
 
 
-        if config.ADD_CATEGORY:
-            print("\nADDING CATEGORIES TO DATA")
-            print("-" * 40)
-            
-            print("Adding categories to Hahu data...")
-            extractAndAddCategoryHahu = ExtractAndAddCategory(
-                mongo_uri=config.MONGO_URI, 
-                db_name=config.DB_NAME, 
-                collection_name="huhu"
-            )
-            extractAndAddCategoryHahu.run()
-            print("Hahu category extraction completed!")
-            
-            print("Adding categories to Messages data...")
-            extractAndAddCategoryMessages = ExtractAndAddCategory(
-                mongo_uri=config.MONGO_URI, 
-                db_name=config.DB_NAME, 
-                collection_name="messages"
-            )
-            extractAndAddCategoryMessages.run()
-            print("Messages category extraction completed!")
-            print("=" * 50)
-        
         if config.EXPORT_HAHU_WEB:
             print("\nEXPORTING HAHU DATA")
             print("-" * 40)

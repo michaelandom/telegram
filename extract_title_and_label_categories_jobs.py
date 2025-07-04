@@ -53,11 +53,13 @@ class ExtractTitleAndLabelCategoryAfriwork:
         if match:
             return match.group("title").strip()
         text = remove_expired_line(text)
-        position_match = re.search(r'\*\*Position:\*\*\s*(.+)', text, re.IGNORECASE)
+        position_match = re.search(
+            r'\*\*Position:\*\*\s*(.+)', text, re.IGNORECASE)
         if position_match:
             return position_match.group(1).strip()
 
-        position_match_alt = re.search(r'Position:\s*(.+)', text, re.IGNORECASE)
+        position_match_alt = re.search(
+            r'Position:\s*(.+)', text, re.IGNORECASE)
         if position_match_alt:
             return position_match_alt.group(1).strip()
         pattern_bold_title = r'^\s*(\*\*|\*)(?P<title>.+?)(\*\*|\*)\s*$'
@@ -67,14 +69,15 @@ class ExtractTitleAndLabelCategoryAfriwork:
             match_bold = re.search(pattern_bold_title, first_line)
             if match_bold:
                 return match_bold.group("title").strip()
-            
-            first_line= lines[0].replace(":","")
+
+            first_line = lines[0].replace(":", "")
             return first_line.strip()
         return None
 
     def load_categories(self):
         with open(self.path_cs_categories_json, "r") as f:
             return json.load(f)
+
     def categorize_job_title(self, title: str, text: str, cs_categorize):
         def contains_whole_word(text, word):
             pattern = r'\b{}\b'.format(re.escape(word))
@@ -102,8 +105,14 @@ class ExtractTitleAndLabelCategoryAfriwork:
             self.linkedinJobs()
 
         print("Combined job descriptions saved to combined.txt")
+
     def freelance_ethio(self):
-        query = {"channel_username": {"$eq": "freelance_ethio"}}
+        query = {"channel_username": {"$eq": "freelance_ethio"},
+                 "$or": [
+            {"category": {"$eq": ""}},
+            {"category": {"$exists": False}}
+        ]
+        }
         documents = self.collection.find(query)
         cs_categorize = self.load_categories()
         for doc in documents:
@@ -111,7 +120,8 @@ class ExtractTitleAndLabelCategoryAfriwork:
             title = self.extract_job_title(text)
             category = None
             if title:
-                category = self.categorize_job_title(title, text,cs_categorize)
+                category = self.categorize_job_title(
+                    title, text, cs_categorize)
             description = doc.get("job_detail_for_markup_url", {}).get(
                 "data", {}).get("view_job_details", {}).get("description", "")
             if text and description:
@@ -126,7 +136,12 @@ class ExtractTitleAndLabelCategoryAfriwork:
                     {"$set": {"title": title, "category": category, }})
 
     def geezjob(self):
-        query = {"channel_username": {"$eq": "geezjob"}}
+        query = {"channel_username": {"$eq": "geezjob"},
+                 "$or": [
+            {"category": {"$eq": ""}},
+            {"category": {"$exists": False}}
+        ]
+        }
         documents = self.collection.find(query)
         cs_categorize = self.load_categories()
         for doc in documents:
@@ -134,7 +149,8 @@ class ExtractTitleAndLabelCategoryAfriwork:
             title = self.extract_job_title(text)
             category = None
             if title:
-                category = self.categorize_job_title(title, text,cs_categorize)
+                category = self.categorize_job_title(
+                    title, text, cs_categorize)
             if text:
                 combined = self.clean_and_combine_geezjob(text)
                 self.collection.update_one(
@@ -146,7 +162,12 @@ class ExtractTitleAndLabelCategoryAfriwork:
                     {"$set": {"title": title, "category": category, }})
 
     def hahujobs(self):
-        query = {"channel_username": {"$eq": "hahujobs"}}
+        query = {"channel_username": {"$eq": "hahujobs"},
+                 "$or": [
+            {"category": {"$eq": ""}},
+            {"category": {"$exists": False}}
+        ]
+        }
         documents = self.collection.find(query)
         cs_categorize = self.load_categories()
         for doc in documents:
@@ -154,7 +175,8 @@ class ExtractTitleAndLabelCategoryAfriwork:
             title = self.extract_job_title(text)
             category = None
             if title:
-                category = self.categorize_job_title(title, text,cs_categorize)
+                category = self.categorize_job_title(
+                    title, text, cs_categorize)
             if text:
                 text = remove_expired_line(text)
                 combined = self.clean_and_combine_geezjob(text)
@@ -165,9 +187,14 @@ class ExtractTitleAndLabelCategoryAfriwork:
                 self.collection.update_one(
                     {"_id": doc["_id"]},
                     {"$set": {"title": title, "category": category, }})
-  
+
     def linkedinJobs(self):
-        query = {}
+        query = {
+            "$or": [
+                {"category": {"$eq": ""}},
+                {"category": {"$exists": False}}
+            ]
+        }
 
         documents = self.collection.find(query)
         cs_categorize = self.load_categories()
@@ -176,17 +203,21 @@ class ExtractTitleAndLabelCategoryAfriwork:
             title = doc.get("job_title", "")
             category = None
             if title:
-                category = self.categorize_job_title(title, text,cs_categorize)
+                category = self.categorize_job_title(
+                    title, text, cs_categorize)
             if text:
-                text= remove_text_line(text)
+                text = remove_text_line(text)
             self.collection.update_one(
-                    {"_id": doc["_id"]},
-                    {"$set": {"title": title, "category": category, "combined_description_text":  text}})
+                {"_id": doc["_id"]},
+                {"$set": {"title": title, "category": category, "combined_description_text":  text}})
+
 
 def remove_expired_line(text):
-    text = text.replace('- - EXPIRED - -','')
+    text = text.replace('- - EXPIRED - -', '')
     return text
+
+
 def remove_text_line(text):
-    text = text.replace('Show more','')
-    text = text.replace('Show less','')
+    text = text.replace('Show more', '')
+    text = text.replace('Show less', '')
     return text

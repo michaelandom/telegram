@@ -125,7 +125,7 @@ class JobDataSet:
                 self.collection.bulk_write(update_operations)
 
     def move_job_from_message(self):
-        messages_jobs = self.collection.find({"job_moved": {"$exists": False}})
+        messages_jobs = self.collection.find({"job_moved": {"$exists": False},"combined_description_text":{"$exists": True, "$ne": ""}})
         existing_job_ids = set(doc["job_id"] for doc in self.collection_jobs.find({}, {"job_id": 1}))
         insert_operations = []
         update_operations = []
@@ -194,7 +194,7 @@ class JobDataSet:
                 self.collection.bulk_write(update_operations)
 
     def move_job_from_hahu_web(self):
-        messages_jobs = self.collection.find({"job_moved": {"$exists": False}})
+        messages_jobs = self.collection.find({"job_moved": {"$exists": False},"combined_description_text":{"$exists": True, "$ne": ""}})
         
         existing_job_ids = set(doc["job_id"] for doc in self.collection_jobs.find({}, {"job_id": 1}))
         insert_operations = []
@@ -247,7 +247,7 @@ class JobDataSet:
             if count % batch_size == 0:
                 batch_end_time = time.time()
                 elapsed_batch_time = batch_end_time - batch_start_time
-                print(f"⏱️ Batch of {batch_size} collected in {elapsed_batch_time:.2f} seconds.")
+                print(f"Batch of {batch_size} collected in {elapsed_batch_time:.2f} seconds.")
 
                 if insert_operations:
                     self.collection_jobs.bulk_write(insert_operations)
@@ -259,7 +259,7 @@ class JobDataSet:
                 batch_start_time = time.time()  
 
         if insert_operations or update_operations:
-            print(f"⏱️ Final batch (less than {batch_size}) collected in {time.time() - batch_start_time:.2f} seconds.")
+            print(f"Final batch (less than {batch_size}) collected in {time.time() - batch_start_time:.2f} seconds.")
             if insert_operations:
                 self.collection_jobs.bulk_write(insert_operations)
             if update_operations:

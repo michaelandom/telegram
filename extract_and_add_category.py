@@ -37,7 +37,12 @@ class ExtractAndAddCategory:
 
 
     def run(self):
-        query = {}
+        query = {
+    "$or": [
+        {"category": {"$eq": ""}},
+        {"category": {"$exists": False}}
+    ]
+}
         documents = self.collection.find(query)
         cs_categorize = self.load_categories()
         for doc in documents:
