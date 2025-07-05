@@ -16,6 +16,7 @@ from afriwork_to_csv import AfriworkToCsv
 from hahu_web_to_csv import HahuToCsv
 from job_data_set import JobDataSet
 from job_postings_aggregation import JobPostingsVisualizer
+from category_test import CategoryAggregator
 class Config:
     def __init__(self):
         self.API_ID = '29511239'
@@ -28,6 +29,7 @@ class Config:
         self.SCRAPE_AFRIWORKET= False
         self.SCRAPE_HAHU_WEB= False
         self.ADD_CATEGORY=True
+        self.UPDATE_CATEGORY_COUNT=True
         self.FIX_TITLE_AFRIWORK=True
         self.FIX_TITLE_GEEZJOB=True
         self.FIX_TITLE_LINKEDIN=True
@@ -567,6 +569,17 @@ async def main():
             )
             extractAndAddCategoryHahu.move_job_from_message()
             print("Telegram  completed!")
+
+            category_aggregator = CategoryAggregator(
+                mongo_uri=config.MONGO_URI, 
+                db_name=config.DB_NAME, 
+                collection_name="jobs"
+            )
+            category_aggregator.run()
+
+
+
+
 
         if config.EXPORT_CHART:
             
