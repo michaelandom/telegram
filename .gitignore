@@ -3,6 +3,7 @@
 .env
 /old/
 /bert_output/
+/roberta_output/
 /bert_output_r/
 /bert_output2/
 /bert_output3/
