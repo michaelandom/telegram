@@ -92,6 +92,7 @@ class JobDataSet:
                 "seniority_level": linkedin_job.get("seniority_level"),
                 "job_location": linkedin_job.get("job_location") or None,
                 "country": None,
+                "new_job": True,
             }
 
             insert_operations.append(pymongo.InsertOne(job))
@@ -105,7 +106,7 @@ class JobDataSet:
             if count % batch_size == 0:
                 batch_end_time = time.time()
                 elapsed_batch_time = batch_end_time - batch_start_time
-                print(f"⏱️ Batch of {batch_size} collected in {elapsed_batch_time:.2f} seconds.")
+                print(f"Batch of {batch_size} collected in {elapsed_batch_time:.2f} seconds.")
 
                 # Bulk write
                 if insert_operations:
@@ -118,7 +119,7 @@ class JobDataSet:
                 batch_start_time = time.time()  # Restart timing for the next batch
 
         if insert_operations or update_operations:
-            print(f"⏱️ Final batch (less than {batch_size}) collected in {time.time() - batch_start_time:.2f} seconds.")
+            print(f"Final batch (less than {batch_size}) collected in {time.time() - batch_start_time:.2f} seconds.")
             if insert_operations:
                 self.collection_jobs.bulk_write(insert_operations)
             if update_operations:
@@ -161,6 +162,7 @@ class JobDataSet:
                 "seniority_level": None,
                 "job_location": "Addis Ababa",
                 "country": "Ethiopia",
+                "new_job": True,
             }
 
             insert_operations.append(pymongo.InsertOne(job))
@@ -174,7 +176,7 @@ class JobDataSet:
             if count % batch_size == 0:
                 batch_end_time = time.time()
                 elapsed_batch_time = batch_end_time - batch_start_time
-                print(f"⏱️ Batch of {batch_size} collected in {elapsed_batch_time:.2f} seconds.")
+                print(f"Batch of {batch_size} collected in {elapsed_batch_time:.2f} seconds.")
 
                 # Bulk write
                 if insert_operations:
@@ -187,7 +189,7 @@ class JobDataSet:
                 batch_start_time = time.time()  # Restart timing for the next batch
 
         if insert_operations or update_operations:
-            print(f"⏱️ Final batch (less than {batch_size}) collected in {time.time() - batch_start_time:.2f} seconds.")
+            print(f"Final batch (less than {batch_size}) collected in {time.time() - batch_start_time:.2f} seconds.")
             if insert_operations:
                 self.collection_jobs.bulk_write(insert_operations)
             if update_operations:
@@ -234,6 +236,7 @@ class JobDataSet:
                 "seniority_level": None,
                 "job_location": "Addis Ababa",
                 "country": "Ethiopia",
+                "new_job": True
             }
 
             insert_operations.append(pymongo.InsertOne(job))

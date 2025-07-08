@@ -1,5 +1,5 @@
 2025-06-04 22:30:57,519 - INFO - === Enhanced ML Pipeline Starting ===
-2025-06-04 22:30:57,520 - INFO - ✅ BERT dependencies available
+2025-06-04 22:30:57,520 - INFO - BERT dependencies available
 2025-06-04 22:30:57,520 - INFO -    PyTorch version: 2.7.0
 2025-06-04 22:30:57,520 - INFO -    Transformers version: 4.52.4
 2025-06-04 22:30:57,520 - INFO -    Using CPU for BERT training

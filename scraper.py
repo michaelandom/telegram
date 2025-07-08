@@ -9,6 +9,7 @@ from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError, ConnectionFailure
 from urllib.parse import urlparse, parse_qs
 from afriwork_scraper_mini_app import AfriworketMiniAppScraper
+from create_job_view import VotingJobLabeler
 from hahu_web_site_scraper import HahuWebSiteScraper
 from extract_and_add_category import ExtractAndAddCategory
 from extract_title_and_label_categories_jobs import ExtractTitleAndLabelCategoryAfriwork
@@ -17,17 +18,22 @@ from hahu_web_to_csv import HahuToCsv
 from job_data_set import JobDataSet
 from job_postings_aggregation import JobPostingsVisualizer
 from category_test import CategoryAggregator
+from dotenv import load_dotenv
+from bert_test import BERTJobClassifier
+from xboost_test import XGBJobClassifier
+from roberta_test import RoBERTaJobClassifier
+
 class Config:
     def __init__(self):
-        self.API_ID = '29511239'
-        self.API_HASH = '''29501cdd06a5bd2bfdef1e0691dbd1af'''
-        self.PHONE_NUMBER = '+49151759448'
+        self.API_ID = os.getenv("API_ID")
+        self.API_HASH = os.getenv("API_HASH")
+        self.PHONE_NUMBER = os.getenv("PHONE_NUMBER")
         self.MONGO_URI = "mongodb://localhost:27017/"
         self.DB_NAME = "telegram"
         self.LIMIT = 500
-        self.SCRAPE_TELEGRAM= False
-        self.SCRAPE_AFRIWORKET= False
-        self.SCRAPE_HAHU_WEB= False
+        self.SCRAPE_TELEGRAM= True
+        self.SCRAPE_AFRIWORKET= True
+        self.SCRAPE_HAHU_WEB= True
         self.ADD_CATEGORY=True
         self.UPDATE_CATEGORY_COUNT=True
         self.FIX_TITLE_AFRIWORK=True
@@ -35,6 +41,7 @@ class Config:
         self.FIX_TITLE_LINKEDIN=True
         self.FIX_TITLE_HAHU_TELEGRAM=True
         self.MOVE_ALL_JOBS=True
+        self.PREDICT_JOB=True
         self.EXPORT_CHART=False
         self.EXPORT_AFRIWORK=False
         self.EXPORT_ALL_JOBS=False
@@ -366,7 +373,7 @@ class TelegramChannelScraper:
 async def main():
     print("Starting Job Scraper Application")
     print("=" * 60)
-    
+    load_dotenv()
     config = Config()
     
     scraper = TelegramChannelScraper(
@@ -573,7 +580,7 @@ async def main():
             category_aggregator = CategoryAggregator(
                 mongo_uri=config.MONGO_URI, 
                 db_name=config.DB_NAME, 
-                collection_name="jobs"
+                source_collection="jobs"
             )
             category_aggregator.run()
 
@@ -685,7 +692,44 @@ async def main():
                 print("ALL JOB export to CSV completed!")
                 print("=" * 50)
         
-        
+        if config.PREDICT_JOB:
+            print("Predict Job XGBoost")
+            print("-" * 40)
+            print("Predict with XGBoost...")
+            
+            classifier = XGBJobClassifier()
+            classifier.predict_and_update_mongodb()
+            print("Predict with XGBoost completed!")
+            print("=" * 50)
+
+            print("Predict Job Bert")
+            print("-" * 40)
+            print("Predict with Bert...")
+            
+            classifier = BERTJobClassifier()
+            classifier.predict_and_update_mongodb()
+            print("Predict with Bert completed!")
+            print("=" * 50)
+
+            print("Predict Job RoBERTa")
+            print("-" * 40)
+            print("Predict with RoBERTa...")
+            
+            classifier = RoBERTaJobClassifier()
+            classifier.predict_and_update_mongodb()
+            print("Predict with RoBERTa completed!")
+            print("=" * 50)
+
+            print("Creating view")
+            print("-" * 40)
+            print("VotingJob...")
+            labeler = VotingJobLabeler()
+            labeler.run()
+            print("view completed!")
+            print("=" * 50)
+
+
+
         print("\nALL OPERATIONS COMPLETED SUCCESSFULLY!")
         print("=" * 60)
         

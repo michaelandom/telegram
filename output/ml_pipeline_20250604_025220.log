@@ -252,7 +252,7 @@ Name: count, dtype: int64
 2025-06-04 14:12:58,399 - INFO - ----------------------------------------
 2025-06-04 14:12:58,399 - INFO - Best performing model: XGBoost_Tuned
 2025-06-04 14:12:58,399 - INFO - Best test accuracy: 0.9600
-2025-06-04 14:12:58,399 - INFO - ✅ Excellent performance achieved!
+2025-06-04 14:12:58,399 - INFO - Excellent performance achieved!
 2025-06-04 14:12:58,399 - INFO - 
 2025-06-04 14:12:58,399 - INFO - ================================================================================
 2025-06-04 14:12:58,399 - INFO - Detailed report saved as ml_pipeline_report_20250604_141258.txt
@@ -262,6 +262,6 @@ Name: count, dtype: int64
 2025-06-04 14:12:58,442 - INFO -   2. Software Development / Engineering (confidence: 0.0035360646434128284)
 2025-06-04 14:12:58,442 - INFO -   3. IT & Systems Engineering (confidence: 0.0032250366639345884)
 2025-06-04 14:12:58,442 - INFO - 
-⏱️  Total Enhanced Pipeline Execution Time: 40838.00 seconds
+ Total Enhanced Pipeline Execution Time: 40838.00 seconds
 2025-06-04 14:12:58,442 - INFO - 🎉 Enhanced ML Pipeline Completed Successfully!
 2025-06-04 14:12:58,442 - INFO - 📊 Check generated files for detailed results and visualizations

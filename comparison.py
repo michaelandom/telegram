@@ -8,8 +8,10 @@ MONGO_URI = "mongodb://localhost:27017"
 DATABASE_NAME = "telegram"
 COLLECTION_NAME = "jobs"
 
-model_mapping= {}
-xgb_categories= []
+model_mapping = {}
+xgb_categories = []
+
+
 def update_view(collection):
     pipeline = [
         {
@@ -25,19 +27,32 @@ def update_view(collection):
                         "if": {
                             "$in": [
                                 "$predicted_job_title_xgb_model",
-                                xgb_categories
-                                # [
-                                #     "other",
-                                #     "Product / Project Management (Technical)"
-                                # ]
+                                # xgb_categories
+                                [
+                                    "other",
+                                    "Product / Project Management (Technical)"
+                                ]
                             ]
                         },
                         "then": "$predicted_job_title_xgb_model",
                         "else": "$predicted_job_title_bert_model"
                     }
-                }
-            }
+                },
+            },
         },
+        #  {
+        #     "$addFields": {
+        #         "is_prediction_wrong": {
+        #             "$cond": {
+        #                 "if": {
+        #                     "$eq": ["$category", "$final_prediction_label"]
+        #                 },
+        #                 "then": 0,
+        #                 "else": 1
+        #             }
+        #         }
+        #     }
+        # },
         {
             "$merge": {
                 "into": "job_with_voting",
@@ -138,7 +153,8 @@ def per_category_accuracy(collection):
     total_jobs = 0
 
     for entry in results:
-        model_mapping[entry["category"]]= "bert" if max(entry["xgb_accuracy"], entry["roberta_accuracy"]) < entry["bert_accuracy"] else "xgb" if max(entry["xgb_accuracy"], entry["roberta_accuracy"]) == entry["xgb_accuracy"] else "roberta"
+        model_mapping[entry["category"]] = "bert" if max(entry["xgb_accuracy"], entry["roberta_accuracy"]) < entry["bert_accuracy"] else "xgb" if max(
+            entry["xgb_accuracy"], entry["roberta_accuracy"]) == entry["xgb_accuracy"] else "roberta"
         correct = entry["xgb_accuracy"] * entry["total_jobs"]
         total_xgb_correct += correct
         correct = entry["bert_accuracy"] * entry["total_jobs"]
@@ -146,7 +162,8 @@ def per_category_accuracy(collection):
         correct = entry["roberta_accuracy"] * entry["total_jobs"]
         total_RoBERTa_correct += correct
         total_jobs += entry["total_jobs"]
-    xgb_categories = [category for category, model in model_mapping.items() if model == 'xgb']
+    xgb_categories = [category for category,
+                      model in model_mapping.items() if model == 'xgb']
     overall_accuracy = total_xgb_correct / total_jobs if total_jobs > 0 else 0
     print(
         f"\n Overall Accuracy of xgb: {overall_accuracy:.4f} ({total_xgb_correct:.0f}/{total_jobs})")
@@ -321,20 +338,21 @@ def plot_bar_chart(df, title, ylabel, columns, colors, rotate_xticks=True):
     plt.show()
 
 
-def compute_confusion_matrix(db):
+def compute_confusion_matrix(db,field = "final_prediction_label", model = "voting"):
     collection = db["job_with_voting"]
     pipeline = [
         {
             "$match": {
                 "category": {"$ne": None, "$ne": ""},
-                "final_prediction_label": {"$ne": None, "$ne": ""}
+                field: {"$ne": None, "$ne": ""},
+               "approved": {"$exists": False}
             }
         },
         {
             "$group": {
                 "_id": {
                     "true_label": "$category",
-                    "predicted_label": "$final_prediction_label"
+                    "predicted_label": "$"+field
                 },
                 "count": {"$sum": 1}
             }
@@ -365,7 +383,7 @@ def compute_confusion_matrix(db):
     plt.figure(figsize=(14, 10))
     sns.heatmap(conf_matrix_df.astype(int), annot=True,
                 fmt="d", cmap="Blues", cbar=True)
-    plt.title("Confusion Matrix: True vs Predicted Categories with voting")
+    plt.title(f"Confusion Matrix: True vs Predicted Categories with {model}")
     plt.ylabel("True Label")
     plt.xlabel("Predicted Label")
     plt.xticks(rotation=45, ha='right')
@@ -380,10 +398,7 @@ def main():
     client = MongoClient(MONGO_URI)
     db = client[DATABASE_NAME]
     collection = db[COLLECTION_NAME]
-    # === update view ===
-
-
-    # === Per-category Accuracy ===
+    
     per_cat = [c for c in per_category_accuracy(
         collection) if c["category"] is not None]
     df_accuracy = pd.DataFrame(per_cat)
@@ -392,7 +407,7 @@ def main():
     plot_bar_chart(df_accuracy, "Per-Category Accuracy", "Accuracy",
                    ["roberta_accuracy", "xgb_accuracy", "bert_accuracy"], ['orange', 'green', 'red'])
     update_view(collection)
-    # === Per-category Accuracy with voting ===
+    
     per_cat = [c for c in per_category_accuracy_with_voting(
         db) if c["category"] is not None]
     df_accuracy = pd.DataFrame(per_cat)
@@ -402,7 +417,6 @@ def main():
                    ["accuracy"], ['green'])
 
     compute_confusion_matrix(db)
-
     # === Disagreement Analysis ===
     disagreements = [d for d in disagreement_analysis(
         collection) if d["category"] is not None]

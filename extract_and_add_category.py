@@ -35,14 +35,13 @@ class ExtractAndAddCategory:
 
         return "other"
 
-
     def run(self):
         query = {
-    "$or": [
-        {"category": {"$eq": ""}},
-        {"category": {"$exists": False}}
-    ]
-}
+            "$or": [
+                {"category": {"$eq": ""}},
+                {"category": {"$exists": False}}
+            ]
+        }
         documents = self.collection.find(query)
         cs_categorize = self.load_categories()
         for doc in documents:
@@ -51,7 +50,8 @@ class ExtractAndAddCategory:
             summary = doc.get("summary", "") or ""
             category = None
             if title:
-                category = self.categorize_job_title(title,description,summary, cs_categorize)
+                category = self.categorize_job_title(
+                    title, description, summary, cs_categorize)
             self.collection.update_one(
                 {"_id": doc["_id"]},
                 {"$set": {"title": title, "category": category, }})

@@ -27,7 +27,6 @@ class JobDataset(Dataset):
         text = str(self.texts[idx])
         label = self.labels[idx]
         
-        # Tokenize text
         encoding = self.tokenizer(
             text,
             truncation=True,
@@ -279,30 +278,15 @@ def create_bert_classifier(num_classes, model_name='bert-base-uncased'):
         raise
 
 
-# Example usage function
 def train_bert_model(X_train, y_train, X_val, y_val, num_classes, 
                      epochs=3, batch_size=16, learning_rate=2e-5):
     """
     Convenient function to train BERT model
-    
-    Args:
-        X_train: Training texts
-        y_train: Training labels
-        X_val: Validation texts  
-        y_val: Validation labels
-        num_classes: Number of classes
-        epochs: Training epochs
-        batch_size: Batch size
-        learning_rate: Learning rate
-    
-    Returns:
-        Trained BERT model
+
     """
     
-    # Create and train model
     model = create_bert_classifier(num_classes)
     
-    # Train the model
     model.fit(
         X_train, y_train, 
         X_val, y_val,
@@ -314,7 +298,6 @@ def train_bert_model(X_train, y_train, X_val, y_val, num_classes,
     return model
 
 
-# Memory optimization utilities
 def clear_cuda_cache():
     """Clear CUDA cache to free up memory"""
     if torch.cuda.is_available():

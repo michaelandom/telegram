@@ -882,9 +882,9 @@ def generate_detailed_report(results, cv_results, clustering_results, label_enco
 
     # Performance insights
     if best_accuracy > 0.9:
-        report.append("✅ Excellent performance achieved!")
+        report.append("Excellent performance achieved!")
     elif best_accuracy > 0.8:
-        report.append("✅ Good performance achieved.")
+        report.append("Good performance achieved.")
     elif best_accuracy > 0.7:
         report.append(
             "Moderate performance. Consider feature engineering or more data.")
@@ -1073,7 +1073,7 @@ def main():
 
         total_time = time.time() - total_start_time
         logger.info(
-            f"\n⏱️  Total Enhanced Pipeline Execution Time: {total_time:.2f} seconds")
+            f"\n Total Enhanced Pipeline Execution Time: {total_time:.2f} seconds")
         logger.info("🎉 Enhanced ML Pipeline Completed Successfully!")
         logger.info(
             "📊 Check generated files for detailed results and visualizations")

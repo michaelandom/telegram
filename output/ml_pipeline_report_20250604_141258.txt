@@ -111,6 +111,6 @@ RECOMMENDATIONS
 ----------------------------------------
 Best performing model: XGBoost_Tuned
 Best test accuracy: 0.9600
-✅ Excellent performance achieved!
+Excellent performance achieved!
 
 ================================================================================

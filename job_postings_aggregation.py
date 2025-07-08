@@ -5,17 +5,11 @@ import matplotlib.pyplot as plt
 
 class JobPostingsVisualizer:
     def __init__(self, mongo_uri, db_name, collection_name):
-        """
-        Initialize MongoDB connection.
-        """
         self.client = pymongo.MongoClient(mongo_uri)
         self.db = self.client[db_name]
         self.collection = self.db[collection_name]
 
     def aggregate_and_plot_linkedin(self):
-        """
-        Run aggregations and generate charts.
-        """
         pipelines = {
             "company_name": [
                 {"$group": {"_id": "$company_name", "count": {"$sum": 1}}},
@@ -51,7 +45,6 @@ class JobPostingsVisualizer:
             df = df.rename(columns={'_id': field})
 
             if field in ['seniority_level', 'employment_type']:
-                # Pie Chart
                 plt.figure(figsize=(6, 6))
                 plt.pie(df['count'], labels=df[field],
                         autopct='%1.1f%%', startangle=140)
@@ -60,7 +53,6 @@ class JobPostingsVisualizer:
                 plt.savefig(f'job_postings_linkedin_by_{field}.png', dpi=300, bbox_inches='tight')
 
             elif field == 'job_location':
-                # Horizontal Bar Chart
                 plt.figure(figsize=(8, 6))
                 plt.barh(df[field], df['count'], color='lightgreen')
                 plt.xlabel('Number of Postings')
@@ -70,7 +62,6 @@ class JobPostingsVisualizer:
                 plt.savefig(f'job_postings_linkedin_by_{field}.png', dpi=300, bbox_inches='tight')
 
             else:
-                # Bar Chart
                 plt.figure(figsize=(8, 6))
                 plt.bar(df[field], df['count'], color='skyblue')
                 plt.xlabel(field.replace("_", " ").title())
@@ -82,12 +73,8 @@ class JobPostingsVisualizer:
 
 
     def aggregate_and_plot_from_messages(self):
-        """
-        Aggregation for messages dataset with channel_username, date, category, and category by channel_username.
-        """
         plt.style.use('ggplot')
 
-        # 1️⃣ By channel_username
         pipeline_channel = [
             {"$group": {"_id": "$channel_username", "count": {"$sum": 1}}},
             {"$sort": {"count": -1}}
@@ -150,7 +137,6 @@ class JobPostingsVisualizer:
             plt.savefig(f'job_postings_telegram_by_date.png', dpi=300, bbox_inches='tight')
             
         self.collection.delete_many({"category": {"$eq": None}})
-        # 3️⃣ By category
         pipeline_category = [
             {"$group": {"_id": "$category", "count": {"$sum": 1}}},
             {"$sort": {"count": -1}}
@@ -168,7 +154,6 @@ class JobPostingsVisualizer:
             plt.savefig(f'job_postings_telegram_by_category.png', dpi=300, bbox_inches='tight')
 
 
-        # 4️⃣ By category grouped by channel_username
         pipeline_category_channel = [
             {"$group": {"_id": {"category": "$category",
                                 "channel": "$channel_username"}, "count": {"$sum": 1}}},
@@ -377,7 +362,4 @@ class JobPostingsVisualizer:
 
 
     def close(self):
-        """
-        Close MongoDB connection.
-        """
         self.client.close()

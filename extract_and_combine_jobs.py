@@ -65,7 +65,7 @@ def main():
             collection.update_one(
             {"_id": doc["_id"]},
             {"$set": {"title": title,"category":category,}})
-    print("✅ Combined job descriptions saved to combined.txt")
+    print("Combined job descriptions saved to combined.txt")
 
 if __name__ == "__main__":
     main()

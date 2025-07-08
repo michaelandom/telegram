@@ -6,7 +6,8 @@ class CategoryAggregator:
         self.client = MongoClient(mongo_uri)
         self.db = self.client[db_name]
         self.source_collection = self.db[source_collection]
-        self.source_collection.create_index("name", unique=True)
+        self.output_collection = self.db["categories"]
+        self.output_collection.create_index("name", unique=True)
 
     def aggregate_by_category(self):
         pipeline = [
@@ -24,10 +25,8 @@ class CategoryAggregator:
  
     def save_results(self, results):
         collection_name = "categories"
-        output_collection = self.db[collection_name]
-
         for doc in results:
-            output_collection.update_one(
+            self.output_collection.update_one(
                 {"name": doc["_id"]},
                 {"$set": {"total_count": doc["count"]}},
                 upsert=True
