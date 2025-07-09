@@ -67,6 +67,13 @@ def per_category_accuracy_with_voting(db):
     collection = db["job_with_voting"]
     pipeline = [
         {
+            "$match":{
+                "new_job":{
+                    "$exists": True
+                }
+            }
+        },
+        {
             "$project": {
                 "category": 1,
                 "correct": {"$eq": ["$category", "$final_prediction_label"]}
@@ -343,6 +350,9 @@ def compute_confusion_matrix(db,field = "final_prediction_label", model = "votin
     pipeline = [
         {
             "$match": {
+                "new_job":{
+                    "$exists": True
+                },
                 "category": {"$ne": None, "$ne": ""},
                 field: {"$ne": None, "$ne": ""},
                "approved": {"$exists": False}
@@ -383,7 +393,7 @@ def compute_confusion_matrix(db,field = "final_prediction_label", model = "votin
     plt.figure(figsize=(14, 10))
     sns.heatmap(conf_matrix_df.astype(int), annot=True,
                 fmt="d", cmap="Blues", cbar=True)
-    plt.title(f"Confusion Matrix: True vs Predicted Categories with {model}")
+    plt.title(f"Confusion Matrix: True vs Predicted Categories with {model} Unseen data")
     plt.ylabel("True Label")
     plt.xlabel("Predicted Label")
     plt.xticks(rotation=45, ha='right')

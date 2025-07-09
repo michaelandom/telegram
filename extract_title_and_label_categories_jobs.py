@@ -214,8 +214,8 @@ class ExtractTitleAndLabelCategoryAfriwork:
 
 def remove_expired_line(text):
     text = text.replace('- - EXPIRED - -', '')
+    text = text.replace('⚠️⚠️⚠️ THIS JOB IS EXPIRED ⚠️⚠️⚠️', '')
     return text
-
 
 def remove_text_line(text):
     text = text.replace('Show more', '')
