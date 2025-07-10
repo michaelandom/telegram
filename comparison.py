@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, UpdateOne
 from collections import defaultdict
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -21,23 +21,29 @@ def update_view(collection):
             }
         },
         {
-            "$addFields": {
+            "$addFields": 
+                {
                 "final_prediction_label": {
-                    "$cond": {
-                        "if": {
-                            "$in": [
+                    "$cond": [
+                        { "$eq": ["$approved", True] },
+                        "$final_prediction_label", 
+                        {
+                            "$cond": [
+                                {
+                                    "$in": [
+                                        "$predicted_job_title_xgb_model",
+                                        [
+                                            "other",
+                                            "Product / Project Management (Technical)"
+                                        ]
+                                    ]
+                                },
                                 "$predicted_job_title_xgb_model",
-                                # xgb_categories
-                                [
-                                    "other",
-                                    "Product / Project Management (Technical)"
-                                ]
+                                "$predicted_job_title_bert_model"
                             ]
-                        },
-                        "then": "$predicted_job_title_xgb_model",
-                        "else": "$predicted_job_title_bert_model"
-                    }
-                },
+                        }
+                    ]
+                }
             },
         },
         #  {
@@ -63,12 +69,44 @@ def update_view(collection):
     return list(collection.aggregate(pipeline))
 
 
+def update_final_prediction_labels(collection):
+    xgb_categories = ["other", "Product / Project Management (Technical)"]
+    bulk_updates = []
+
+    cursor = collection.find({
+        "approved": {"$exists": False},
+        "predicted_job_title_xgb_model": {"$exists": True},
+        "predicted_job_title_bert_model": {"$exists": True}
+    })
+
+    for doc in cursor:
+        job_id = doc["_id"]
+        xgb_prediction = doc["predicted_job_title_xgb_model"]
+        bert_prediction = doc["predicted_job_title_bert_model"]
+
+        final_label = (
+            xgb_prediction if xgb_prediction in xgb_categories else bert_prediction
+        )
+
+        bulk_updates.append(
+            UpdateOne(
+              {"_id": job_id},
+               {"$set": {"final_prediction_label": final_label}}
+            )
+        )
+
+    if bulk_updates:
+        result = collection.bulk_write(bulk_updates)
+        print(f"Updated {result.modified_count} job(s).")
+    else:
+        print("No updates needed.")
+
 def per_category_accuracy_with_voting(db):
-    collection = db["job_with_voting"]
+    collection = db["jobs"]
     pipeline = [
         {
-            "$match":{
-                "new_job":{
+            "$match": {
+                "new_job": {
                     "$exists": True
                 }
             }
@@ -345,17 +383,17 @@ def plot_bar_chart(df, title, ylabel, columns, colors, rotate_xticks=True):
     plt.show()
 
 
-def compute_confusion_matrix(db,field = "final_prediction_label", model = "voting"):
-    collection = db["job_with_voting"]
+def compute_confusion_matrix(db, field="final_prediction_label", model="voting", is_source_of_truth=False):
+    collection = db["jobs"]
     pipeline = [
         {
             "$match": {
-                "new_job":{
+                "new_job": {
                     "$exists": True
                 },
                 "category": {"$ne": None, "$ne": ""},
                 field: {"$ne": None, "$ne": ""},
-               "approved": {"$exists": False}
+                "approved": {"$exists": False}
             }
         },
         {
@@ -368,6 +406,24 @@ def compute_confusion_matrix(db,field = "final_prediction_label", model = "votin
             }
         }
     ]
+
+    if is_source_of_truth:
+        pipeline = [
+            {
+                "$match": {
+                    "data_from": {"$eq": "linkedin"}
+                }
+            },
+            {
+                "$group": {
+                    "_id": {
+                        "true_label": "$category",
+                        "predicted_label": "$"+field
+                    },
+                    "count": {"$sum": 1}
+                }
+            }
+        ]
 
     results = list(collection.aggregate(pipeline))
 
@@ -393,7 +449,8 @@ def compute_confusion_matrix(db,field = "final_prediction_label", model = "votin
     plt.figure(figsize=(14, 10))
     sns.heatmap(conf_matrix_df.astype(int), annot=True,
                 fmt="d", cmap="Blues", cbar=True)
-    plt.title(f"Confusion Matrix: True vs Predicted Categories with {model} Unseen data")
+    plt.title(
+        f"Confusion Matrix: True vs Predicted {f"Categories with {model} Unseen data" if not is_source_of_truth else f"Categories with {model} source of truth data"}")
     plt.ylabel("True Label")
     plt.xlabel("Predicted Label")
     plt.xticks(rotation=45, ha='right')
@@ -408,7 +465,7 @@ def main():
     client = MongoClient(MONGO_URI)
     db = client[DATABASE_NAME]
     collection = db[COLLECTION_NAME]
-    
+
     per_cat = [c for c in per_category_accuracy(
         collection) if c["category"] is not None]
     df_accuracy = pd.DataFrame(per_cat)
@@ -416,8 +473,8 @@ def main():
     print(df_accuracy.to_string(index=False))
     plot_bar_chart(df_accuracy, "Per-Category Accuracy", "Accuracy",
                    ["roberta_accuracy", "xgb_accuracy", "bert_accuracy"], ['orange', 'green', 'red'])
-    update_view(collection)
-    
+    # update_view(collection)
+    update_final_prediction_labels(collection)
     per_cat = [c for c in per_category_accuracy_with_voting(
         db) if c["category"] is not None]
     df_accuracy = pd.DataFrame(per_cat)
@@ -427,6 +484,7 @@ def main():
                    ["accuracy"], ['green'])
 
     compute_confusion_matrix(db)
+
     # === Disagreement Analysis ===
     disagreements = [d for d in disagreement_analysis(
         collection) if d["category"] is not None]

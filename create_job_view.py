@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, UpdateOne
 
 
 class VotingJobLabeler:
@@ -6,7 +6,7 @@ class VotingJobLabeler:
                  mongo_uri="mongodb://localhost:27017",
                  database_name="telegram",
                  source_collection="jobs",
-                 target_collection="job_with_voting",
+                 target_collection="jobs",
                  override_xgb_labels=None):
 
         self.mongo_uri = mongo_uri
@@ -63,11 +63,44 @@ class VotingJobLabeler:
                 }
             }
         ]
+    
+    def update_final_prediction_labels(self):
+        xgb_categories = ["other", "Product / Project Management (Technical)"]
+        bulk_updates = []
+
+        cursor = self.collection.find({
+            "approved": {"$exists": False},
+            "predicted_job_title_xgb_model": {"$exists": True},
+            "predicted_job_title_bert_model": {"$exists": True}
+        })
+
+        for doc in cursor:
+            job_id = doc["_id"]
+            xgb_prediction = doc["predicted_job_title_xgb_model"]
+            bert_prediction = doc["predicted_job_title_bert_model"]
+
+            final_label = (
+                xgb_prediction if xgb_prediction in xgb_categories else bert_prediction
+            )
+
+            bulk_updates.append(
+                UpdateOne(
+                {"_id": job_id},
+                {"$set": {"final_prediction_label": final_label}}
+                )
+            )
+
+        if bulk_updates:
+            result = self.collection.bulk_write(bulk_updates)
+            print(f"Updated {result.modified_count} job(s).")
+        else:
+            print("No updates needed.")
 
     def run(self):
-        pipeline = self.build_pipeline()
-        result = list(self.collection.aggregate(pipeline))
-        print(f"Aggregation pipeline executed. {len(result)} documents processed (if aggregation returns output).")
+        # pipeline = self.build_pipeline()
+        # result = list(self.collection.aggregate(pipeline))
+        self.update_final_prediction_labels()
+        print(f"Aggregation pipeline executed. documents processed (if aggregation returns output).")
 
 
 if __name__ == "__main__":
