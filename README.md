@@ -11,8 +11,8 @@ This project contains three main components:
 ### Sample Output
 
 ![Job Classification Output](output/comprehensive_results_20250603_120511.png)
-![Roberta Output](roberta_output/confusion_matrix_bert_epoch_4.png)
-![bert output](bert_output/confusion_matrix_bert_epoch_3.png)
+![Roberta Output](output/confusion_matrix_bert_epoch_4.png)
+![bert output](output/confusion_matrix_bert_epoch_3.png)
 
 
 ## Requirements
