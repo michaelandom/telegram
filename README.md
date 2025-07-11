@@ -15,6 +15,20 @@ This project contains three main components:
 ![bert output](output/confusion_matrix_bert_epoch_3.png)
 
 
+### Job Categories
+
+- Software Development / Engineering
+- DevOps / Site Reliability Engineering
+- AI
+- Data Engineering
+- Cybersecurity / InfoSec
+- IT / Systems Engineering
+- QA / Testing
+- Product / Project Management (Technical)
+- UI/UX / Design (Tech-Oriented)
+- Misc / Specialized
+- other
+
 ## Requirements
 
 - Python 3.12+
