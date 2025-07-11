@@ -38,6 +38,7 @@ import warnings
 import torch
 from custom_bert import train_bert_model
 from bert_trainer import BertTrainer
+from roberta_trainer import RoBERTaTrainer
 warnings.filterwarnings('ignore')
 
 
@@ -986,6 +987,9 @@ def main():
         bertTrainer = BertTrainer(csv_path="job_output.csv")
         bertTrainer.train_model()
         logger.info("BertTrainer Train data")
+        roBERTaTrainer = RoBERTaTrainer(csv_path="job_output.csv")
+        roBERTaTrainer.train_model()
+        logger.info("roBERTaTrainer Train data")
 
         X, y = load_and_preprocess_data()
 
